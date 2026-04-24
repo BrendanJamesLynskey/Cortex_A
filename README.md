@@ -2,7 +2,7 @@
 
 Interactive slide decks covering the Arm **Cortex-A** application-profile family end-to-end — from the ARM1176 and Cortex-A8 that powered the first smartphones, through the pivot to **AArch64** in Cortex-A57, up to the current Armv9-A "Blackhawk / Chaberton" generations used in flagship phones and SoCs.
 
-Designed as interview preparation for SoC, CPU microarchitecture, and kernel engineers building or working on Arm application processors (phones, tablets, laptops, automotive SoCs, embedded Linux platforms).
+Designed for SoC, CPU microarchitecture, and kernel engineers building or working on Arm application processors (phones, tablets, laptops, automotive SoCs, embedded Linux platforms).
 
 ## ▶ [Open the Series Landing Page](https://brendanjameslynskey.github.io/Cortex_A/)
 
