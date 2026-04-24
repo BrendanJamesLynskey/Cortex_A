@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Arm Cortex-A — Presentation Series</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@400;500;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg:      #0a0a0f;
+    --surface: #131318;
+    --border:  #23232a;
+    --text:    #d4d4d8;
+    --text2:   #a1a1aa;
+    --dim:     #71717a;
+    --accent:  #f59e0b;
+    --green:   #10b981;
+    --purple:  #8b5cf6;
+    --blue:    #60a5fa;
+    --red:     #ef4444;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { font-size: 16px; scroll-behavior: smooth; }
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+  a { color: var(--blue); text-decoration: none; }
+  a:hover { color: #93c5fd; }
+
+  .container { max-width: 920px; margin: 0 auto; padding: 3rem 1.5rem 4rem; }
+
+  header { text-align: center; margin-bottom: 3.5rem; }
+  header .icon { font-size: 3rem; margin-bottom: 0.5rem; }
+  header h1 {
+    font-family: 'Playfair Display', serif;
+    font-weight: 900;
+    font-size: 2.8rem;
+    letter-spacing: -0.02em;
+    color: #fafafa;
+    margin-bottom: 0.3rem;
+  }
+  header .subtitle {
+    font-size: 1.05rem;
+    color: var(--accent);
+    font-weight: 500;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+  }
+  header p { color: var(--text2); max-width: 640px; margin: 0 auto; font-size: 0.95rem; }
+
+  .grid { display: flex; flex-direction: column; gap: 1rem; }
+
+  .card {
+    display: grid;
+    grid-template-columns: 56px 1fr auto;
+    align-items: center;
+    gap: 1.2rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1.25rem 1.5rem;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .card:hover { border-color: rgba(245,158,11,.3); box-shadow: 0 0 20px rgba(245,158,11,.06); }
+  .card.active { border-color: rgba(245,158,11,.35); }
+  .card.active:hover { box-shadow: 0 0 25px rgba(245,158,11,.1); }
+
+  .card .num {
+    font-family: 'Playfair Display', serif;
+    font-weight: 900;
+    font-size: 1.8rem;
+    color: var(--accent);
+    text-align: center;
+    line-height: 1;
+  }
+
+  .card .info h2 {
+    font-family: 'Playfair Display', serif;
+    font-weight: 700;
+    font-size: 1.15rem;
+    color: #fafafa;
+    margin-bottom: 0.2rem;
+  }
+  .card .info p {
+    font-size: 0.82rem;
+    color: var(--dim);
+    line-height: 1.4;
+  }
+
+  .card .action { text-align: right; white-space: nowrap; display: flex; flex-direction: column; align-items: flex-end; gap: 0.4rem; }
+
+  .btn {
+    display: inline-block;
+    padding: 0.45em 1.3em;
+    border-radius: 6px;
+    font-weight: 700;
+    font-size: 0.85rem;
+    transition: background 0.2s, transform 0.1s;
+  }
+  .btn:active { transform: scale(0.97); }
+  .btn-launch {
+    background: var(--accent);
+    color: #0a0a0f;
+  }
+  .btn-launch:hover { background: #fbbf24; color: #0a0a0f; }
+
+  .badge {
+    display: inline-block;
+    padding: 0.25em 0.8em;
+    border-radius: 999px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .badge-complete { background: rgba(16,185,129,.12); color: var(--green); border: 1px solid rgba(16,185,129,.25); }
+
+  footer {
+    text-align: center;
+    margin-top: 3rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border);
+    font-size: 0.82rem;
+    color: var(--dim);
+  }
+  footer a { color: var(--dim); }
+  footer a:hover { color: var(--text2); }
+
+  @media (max-width: 600px) {
+    .card { grid-template-columns: 40px 1fr; gap: 0.8rem; }
+    .card .action { grid-column: 1 / -1; text-align: left; }
+    header h1 { font-size: 2rem; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+<header>
+  <div class="icon">◆</div>
+  <h1>Arm Cortex-A Presentation Series</h1>
+  <div class="subtitle">History · Architecture · Memory · Vectors · Security · Microarchitecture</div>
+  <p>Interactive slide decks covering the Arm Cortex-A application-profile family end-to-end — from the ARM11 classic cores through the AArch64 transition of Cortex-A57, into the Armv9-A flagship Cortex-X925. Designed as interview preparation for SoC, microarchitecture, and kernel engineers working on Arm application processors. Click any presentation below to launch it.</p>
+</header>
+
+<div class="grid">
+
+  <div class="card active">
+    <div class="num">01</div>
+    <div class="info">
+      <h2>History &amp; the Cortex-A Family</h2>
+      <p>ARM11 · Cortex-A8 · A9 · A15 &amp; big.LITTLE · A53/A57 AArch64 pivot · A72 – A78 · Cortex-X1 – X925 · A510/A520/A715/A720/A725 · DynamIQ</p>
+    </div>
+    <div class="action">
+      <span class="badge badge-complete">18 slides</span>
+      <a href="01-history-of-cortex-a/" class="btn btn-launch">▶ Launch</a>
+    </div>
+  </div>
+
+  <div class="card active">
+    <div class="num">02</div>
+    <div class="info">
+      <h2>Armv8-A / Armv9-A Architecture</h2>
+      <p>Exception Levels EL0 – EL3 · AArch64 &amp; AArch32 states · A64 ISA · SPSR/ELR/VBAR · Synchronous vs async exceptions · Armv9-A additions</p>
+    </div>
+    <div class="action">
+      <span class="badge badge-complete">18 slides</span>
+      <a href="02-armv8-a-architecture/" class="btn btn-launch">▶ Launch</a>
+    </div>
+  </div>
+
+  <div class="card active">
+    <div class="num">03</div>
+    <div class="info">
+      <h2>Memory System — VMSA, Caches &amp; Ordering</h2>
+      <p>VMSAv8-64 · 4K/16K/64K granules · Stage 1 &amp; Stage 2 · TLB with ASID/VMID · L1–L3–SLC · PoU vs PoC · DMB/DSB/ISB · LDAR/STLR · LSE atomics</p>
+    </div>
+    <div class="action">
+      <span class="badge badge-complete">18 slides</span>
+      <a href="03-memory-system/" class="btn btn-launch">▶ Launch</a>
+    </div>
+  </div>
+
+  <div class="card active">
+    <div class="num">04</div>
+    <div class="info">
+      <h2>Vector Extensions — NEON, SVE, SVE2, SME</h2>
+      <p>NEON (128-bit fixed) · SVE (vector-length agnostic, 128–2048 bit) · SVE2 mandatory in Armv9-A · SME matrix tiles &amp; streaming mode · Fujitsu A64FX</p>
+    </div>
+    <div class="action">
+      <span class="badge badge-complete">16 slides</span>
+      <a href="04-vector-extensions/" class="btn btn-launch">▶ Launch</a>
+    </div>
+  </div>
+
+  <div class="card active">
+    <div class="num">05</div>
+    <div class="info">
+      <h2>Security &amp; Virtualization</h2>
+      <p>EL2 hypervisor · VHE · EL3 &amp; TrustZone-A · PAC (QARMA) · BTI · MTE colour tags · RME / CCA · Realms · GPT · Four-world model</p>
+    </div>
+    <div class="action">
+      <span class="badge badge-complete">17 slides</span>
+      <a href="05-security-virtualization/" class="btn btn-launch">▶ Launch</a>
+    </div>
+  </div>
+
+  <div class="card active">
+    <div class="num">06</div>
+    <div class="info">
+      <h2>Microarchitecture &amp; DynamIQ</h2>
+      <p>OoO pipelines · Branch prediction · big.LITTLE → DynamIQ Shared Unit · 1+3+4 layout · PMU · SPE · ETE / TRBE · Speculative side-channel mitigations</p>
+    </div>
+    <div class="action">
+      <span class="badge badge-complete">17 slides</span>
+      <a href="06-microarchitecture/" class="btn btn-launch">▶ Launch</a>
+    </div>
+  </div>
+
+</div>
+
+<footer>
+  <p>Part of the <a href="https://github.com/BrendanJamesLynskey/Hardware">Hardware</a> portfolio · Built with <a href="https://revealjs.com">Reveal.js</a> · Playfair Display + DM Sans + JetBrains Mono</p>
+  <p style="margin-top:0.4rem;">Educational use. Source on <a href="https://github.com/BrendanJamesLynskey/Cortex_A">GitHub</a>.</p>
+</footer>
+
+</div>
+</body>
+</html>

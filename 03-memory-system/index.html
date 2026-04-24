@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cortex-A Memory System — VMSA, Caches &amp; Ordering</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@400;500;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/reveal.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/theme/black.min.css">
+<style>
+  :root { --amber:#f5a623;--green:#4ecb8d;--purple:#a78bfa;--blue:#60a5fa;--red:#f87171; --bg:#0a0a0f;--bg2:#10101a;--bg3:#181824;--border:#2a2a3a;--text:#e8e8f0;--muted:#8888a8; }
+  .reveal-viewport { background: var(--bg); }
+  .reveal .slides section { background: transparent; }
+  .reveal section { text-align: left; }
+  .reveal .slides > section { padding: 0.5em; overflow-y: auto !important; align-items: flex-start !important; justify-content: flex-start !important; }
+  .reveal .progress { color: var(--amber); height: 3px; } .reveal .controls { color: var(--amber); }
+  .reveal section::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, var(--amber), var(--green)); }
+  .reveal { font-family: 'DM Sans', sans-serif; color: var(--text); font-size: 22px; }
+  .reveal .slide-number { font-family: 'JetBrains Mono', monospace; font-size: 0.7em; color: var(--muted); }
+  .reveal h1, .reveal h2, .reveal h3 { font-family: 'Playfair Display', serif; color: #fff; text-transform: none; letter-spacing: -0.01em; }
+  .reveal h1 { font-size: 2.4em; font-weight: 900; color: var(--amber); line-height: 1.1; }
+  .reveal h2 { font-size: 1.7em; font-weight: 700; color: var(--amber); margin-bottom: 0.6em; }
+  .reveal h3 { font-size: 1.2em; font-weight: 700; color: var(--green); margin-bottom: 0.3em; }
+  .reveal p  { font-size: 0.75em; line-height: 1.5; color: var(--text); }
+  .reveal li { font-size: 0.7em; line-height: 1.5; margin-bottom: 0.25em; }
+  .reveal code { font-family: 'JetBrains Mono', monospace; font-size: .72em; }
+  .reveal pre  { background: var(--bg3); border: 1px solid var(--border); border-radius: 8px; padding: 0.5em 1em; margin: 0.4em 0; width: 100%; box-shadow: none; }
+  .reveal pre code { font-size: 0.58em; line-height: 1.5; background: transparent; color: #cdd6f4; }
+  .slide-hdr { display: flex; align-items: center; gap: .4em; border-bottom: 1px solid var(--border); padding-bottom: .2em; margin-bottom: .3em; }
+  .slide-hdr .tag { font-family: 'JetBrains Mono', monospace; font-size: 0.55em; font-weight: 600; color: var(--bg); background: var(--amber); padding: .1em .4em; border-radius: 3px; letter-spacing: .04em; }
+  .slide-hdr h2 { margin: 0; font-size: 1.4em; }
+  .cols{display:grid;gap:1em;} .cols-2{grid-template-columns:1fr 1fr;} .cols-3{grid-template-columns:1fr 1fr 1fr;} .cols-6040{grid-template-columns:6fr 4fr;} .cols-4060{grid-template-columns:4fr 6fr;}
+  .card { background: var(--bg2); border: 1px solid var(--border); border-radius: 8px; padding: 1em 1.2em; box-shadow: 0 4px 20px rgba(0,0,0,0.3); margin: 0.4em 0; }
+  .card.amber { border-left: 3px solid var(--amber); } .card.green { border-left: 3px solid var(--green); } .card.purple{ border-left: 3px solid var(--purple); } .card.blue  { border-left: 3px solid var(--blue); } .card.red   { border-left: 3px solid var(--red); }
+  .card h3 { font-size: 1em; margin: 0 0 0.4em; }
+  .card p, .card ul { font-size: 0.8em; margin: 0; color: #b8b8d0; } .card ul { padding-left: 1.2em; } .card li { font-size: 0.85em; margin-bottom: 0.25em; }
+  .reveal table { width: 100%; border-collapse: collapse; font-size: 0.65em; margin: 0.5em 0; }
+  .reveal table th { background: var(--bg3); color: var(--amber); padding: 0.5em 0.7em; border: 1px solid var(--border); text-align: left; font-weight: 700; }
+  .reveal table td { padding: 0.5em 0.7em; border: 1px solid var(--border); color: #ccc; vertical-align: top; }
+  .reveal table tr:nth-child(even) td { background: #0e0e18; }
+  .a{color:var(--amber);font-weight:600;} .g{color:var(--green);font-weight:600;} .p{color:var(--purple);font-weight:600;} .b{color:var(--blue);font-weight:600;} .r{color:var(--red);font-weight:600;} .mono{font-family:'JetBrains Mono',monospace;}
+  svg.diagram { display: block; margin: 0 auto; overflow: visible; }
+  .title-slide h1 { font-size: 2.4em; } .title-slide .subtitle { font-size: 0.85em; color: var(--green); font-weight: 400; letter-spacing: 0.06em; margin: 0.3em 0 0.6em; } .title-slide .meta { font-size: 0.6em; color: var(--muted); font-family: 'JetBrains Mono', monospace; }
+  .dim { color: var(--muted); } .small { font-size: 0.65em; } .smaller { font-size: 0.55em; } .tiny { font-size: 0.48em; }
+  .reveal ul, .reveal ol { margin: .15em 0 .15em 1em; }
+</style>
+</head>
+<body>
+<div class="reveal">
+<div class="slides">
+
+<section class="title-slide" data-background-color="#0a0a0f">
+  <div style="font-family:'JetBrains Mono',monospace;font-size:.5em;color:var(--muted);margin-bottom:.4em;letter-spacing:.1em;">ARM CORTEX-A · PRESENTATION 03</div>
+  <h1>Memory System — VMSA, Caches &amp; Ordering</h1>
+  <div class="subtitle">Translation · TLBs · Cache hierarchy · Weak ordering · LSE atomics</div>
+  <div style="width:60px;height:3px;background:var(--amber);margin-bottom:1.4em;"></div>
+  <div class="meta">VMSAv8-64 · 4K/16K/64K granules · ASID/VMID · PoU/PoC · DMB/DSB/ISB · LDAR/STLR · LSE</div>
+</section>
+
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr"><span class="tag">02</span><h2>Why Cortex-A Memory is Different</h2></div>
+  <div class="cols cols-2">
+    <div>
+      <ul>
+        <li>Cortex-M uses an <strong>MPU</strong> (region-based, no translation). Cortex-A uses a full <strong>MMU with paged virtual memory</strong> — the <strong>VMSA</strong> (Virtual Memory System Architecture).</li>
+        <li>Every memory access goes through <strong>Stage-1</strong> (OS) translation, and possibly <strong>Stage-2</strong> (hypervisor) translation — that's up to 24 page-table walks for one access in the worst case.</li>
+        <li>Memory is strongly <em>weakly</em> ordered — loads and stores can be reordered freely unless explicit barriers or release/acquire operations are used.</li>
+        <li>The memory system is also a <strong>multi-core</strong> story: caches must be coherent across cores + GPU + NPU + DMA engines, using AXI/ACE or CHI.</li>
+      </ul>
+    </div>
+    <div>
+      <div class="card amber">
+        <h3>Two memory models, same CPU</h3>
+        <p>Armv8-A has a weak default, but with optional <strong>release-consistency (RCsc)</strong> and, from v8.3, <strong>RCpc</strong> (processor-consistent) loads. Java volatile, C++ seq_cst, and Linux kernel RCU all compile into these primitives.</p>
+      </div>
+      <div class="card green" style="margin-top:0.4em;">
+        <h3 class="g">Stage-1 + Stage-2 is a feature</h3>
+        <p>Dual-stage translation is how <strong>KVM/Android pKVM</strong> gives guests their own virtual address spaces cheaply — the guest-physical → host-physical mapping is Stage-2, invisible to the guest OS.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr"><span class="tag">03</span><h2>VMSAv8-64 — Three Granule Sizes</h2></div>
+  <table>
+    <tr><th>Granule</th><th>Typical use</th><th>Levels for 48-bit VA</th><th>Block sizes available</th></tr>
+    <tr><td><span class="a">4 KB</span></td><td>Linux default; most servers/phones</td><td>4 (L0→L3)</td><td>4 KB page, 2 MB block, 1 GB block</td></tr>
+    <tr><td><span class="a">16 KB</span></td><td>Apple iOS/macOS default</td><td>4 (L0→L3)</td><td>16 KB page, 32 MB block</td></tr>
+    <tr><td><span class="a">64 KB</span></td><td>Some server workloads, huge-page</td><td>3 (L1→L3)</td><td>64 KB page, 512 MB block</td></tr>
+  </table>
+  <p class="small">Each <strong>Translation Table</strong> level splits 9 bits of VA (for 4 KB) — Level 0..3 use VA[47:39], [38:30], [29:21], [20:12]. 16 KB uses 11-bit indexing per level; 64 KB uses 13-bit indexing.</p>
+  <div class="cols cols-2" style="margin-top:0.4em;">
+    <div>
+      <div class="card blue">
+        <h3 class="b">Block descriptors = huge pages</h3>
+        <p>Instead of walking all the way down to a 4 KB page, an L1 descriptor can directly map a <strong>1 GB block</strong>. Linux uses this for <span class="mono">hugetlb</span> and for the 1:1 kernel map.</p>
+      </div>
+    </div>
+    <div>
+      <div class="card purple">
+        <h3 class="p">Armv8.2-A: 52-bit VA / PA</h3>
+        <p>LVA (Large Virtual Address) extends VA to 52 bits via a 5th level (L-1 for 4 KB granule). LPA extends PA to 52 bits with higher-order bits in the descriptor.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr"><span class="tag">04</span><h2>VA Layout — TTBR0 vs TTBR1</h2></div>
+  <div class="cols cols-2">
+    <div>
+      <svg viewBox="0 0 340 280" style="width:100%;">
+        <rect x="10" y="10" width="320" height="260" rx="10" fill="#10101a" stroke="#f5a623"/>
+        <text x="170" y="32" text-anchor="middle" fill="#f5a623" font-family="Playfair Display" font-weight="700" font-size="13">64-bit VA split (Armv8-A, Linux)</text>
+        <rect x="30" y="50" width="280" height="60" rx="5" fill="#2a1a0a" stroke="#f5a623"/>
+        <text x="170" y="75" text-anchor="middle" fill="#f5a623" font-family="JetBrains Mono" font-size="10" font-weight="700">0xFFFF_0000_0000_0000 – 0xFFFF_FFFF_FFFF_FFFF</text>
+        <text x="170" y="92" text-anchor="middle" fill="#cdd6f4" font-family="JetBrains Mono" font-size="9">Kernel half — TTBR1_EL1</text>
+        <rect x="30" y="125" width="280" height="30" rx="3" fill="#0e0e18" stroke="#555"/>
+        <text x="170" y="145" text-anchor="middle" fill="#8888a8" font-family="JetBrains Mono" font-size="9">Canonical hole — faults on access</text>
+        <rect x="30" y="170" width="280" height="60" rx="5" fill="#1a2540" stroke="#60a5fa"/>
+        <text x="170" y="195" text-anchor="middle" fill="#60a5fa" font-family="JetBrains Mono" font-size="10" font-weight="700">0x0000_0000_0000_0000 – 0x0000_FFFF_FFFF_FFFF</text>
+        <text x="170" y="212" text-anchor="middle" fill="#cdd6f4" font-family="JetBrains Mono" font-size="9">User half — TTBR0_EL1 (per process)</text>
+        <text x="170" y="255" text-anchor="middle" fill="#8888a8" font-family="JetBrains Mono" font-size="10">VA[63:48] must be all-0 or all-1 ("canonical")</text>
+      </svg>
+    </div>
+    <div>
+      <ul>
+        <li><strong class="b">TTBR0_EL1</strong> — user page-table root. Changed on every <span class="mono">context_switch</span> (tagged by ASID).</li>
+        <li><strong class="a">TTBR1_EL1</strong> — kernel page-table root. Stays the same for all processes.</li>
+        <li>Effective VA width controlled by <span class="mono">TCR_EL1.T0SZ / T1SZ</span> — <span class="mono">T0SZ=16</span> gives 48-bit user VA; <span class="mono">T0SZ=12</span> gives 52-bit (LVA).</li>
+        <li>If VA[63:48] is neither all-0 nor all-1, the CPU faults with a <strong>translation fault</strong> — the "canonical address" check.</li>
+        <li><strong>TBI</strong> (Top Byte Ignore) — allows bits [63:56] to carry a tag (used by MTE and HWASAN) without faulting.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr"><span class="tag">05</span><h2>The Page-Table Walker</h2></div>
+  <div class="cols cols-2">
+    <div>
+      <ul>
+        <li>On a TLB miss the <strong>Hardware Table Walker (HTW)</strong> walks the in-memory page tables without any software help.</li>
+        <li>Each descriptor is 8 bytes with a type (block / table / invalid) and PA + attribute bits.</li>
+        <li>Walk is <strong>recursive</strong>: L0 → L1 → L2 → L3. Each step issues a memory read to the PA of the next table.</li>
+        <li>A walk can itself miss in the cache and go to DRAM — expensive. Modern cores prefetch walks into a dedicated <strong>walker cache</strong> (sometimes called an "intermediate TLB" or "paging-structure cache").</li>
+        <li>On Stage-1+Stage-2, each Stage-1 walk-step is itself Stage-2-translated — worst case <strong>24 reads</strong> per VA translation.</li>
+      </ul>
+    </div>
+    <div>
+      <pre><code class="nohighlight">// Simplified 4 KB, 48-bit VA walk (4 levels)
+
+VA[47:39]  = L0 index (PGD)
+VA[38:30]  = L1 index (PUD)
+VA[29:21]  = L2 index (PMD)
+VA[20:12]  = L3 index (PTE)
+VA[11:0]   = page offset
+
+PTE descriptor layout (simplified):
+  [0]     valid
+  [1]     table (1) or block/page (0)
+  [11:2]  lower attrs (AP, SH, AttrIndx, AF, nG)
+  [47:12] output address (PA bits)
+  [63:51] upper attrs (PBHA, GP, DBM, Contig, PXN, UXN)
+
+// AF = Access Flag: HW can set on access, or
+// software-set (older cores). Armv8.1 adds HW update.
+</code></pre>
+    </div>
+  </div>
+</section>
+
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr"><span class="tag">06</span><h2>ASID &amp; VMID — Tagged TLB Entries</h2></div>
+  <div class="cols cols-2">
+    <div>
+      <ul>
+        <li><strong class="a">ASID</strong> (Address Space ID) — 8- or 16-bit tag in every TLB entry for Stage-1 user translations. Comes from <span class="mono">TTBR0_EL1[63:48]</span>.</li>
+        <li>Lets the CPU switch user page tables without flushing the TLB — entries for the old process stay, tagged with its ASID.</li>
+        <li>Kernel entries are <strong>global (nG=0)</strong> — not tagged by ASID, so they're visible from every process without duplication.</li>
+        <li><strong class="a">VMID</strong> (VM ID) — similar concept at Stage-2, tags hypervisor guest translations. 8- or 16-bit. Set in <span class="mono">VTTBR_EL2[63:48]</span>.</li>
+        <li>Linux rolls its ASID allocator when all ASIDs used; rollover triggers a broadcast <span class="mono">TLBI ASIDE1IS</span> if ASID reassigned.</li>
+      </ul>
+    </div>
+    <div>
+      <div class="card green">
+        <h3 class="g">Why tags matter</h3>
+        <p>Every context-switch would otherwise flush L1 TLB (~48-128 entries). Re-filling that costs hundreds of cycles. ASID turns context switch into a near-free operation for the TLB.</p>
+      </div>
+      <pre><code class="nohighlight">// TLBI maintenance ops (outer sharable, all ELs)
+
+tlbi  vmalle1is          // all entries at EL1 (local ASID)
+tlbi  aside1is, x0       // all entries matching ASID in x0
+tlbi  vae1is, x1         // single VA (encoded in x1)
+tlbi  vmalls12e1is       // all Stage-1+2 for this VMID
+dsb   ish                // wait for it
+isb                      // restart pipeline fetch
+</code></pre>
+    </div>
+  </div>
+</section>
+
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr"><span class="tag">07</span><h2>Memory Types &amp; Attributes</h2></div>
+  <table>
+    <tr><th>Type</th><th>Cacheable</th><th>Reorder?</th><th>Speculation?</th><th>Use</th></tr>
+    <tr><td><span class="a">Normal</span></td><td>Yes (with policy)</td><td>Yes (weak)</td><td>Yes</td><td>DRAM, cacheable regions</td></tr>
+    <tr><td><span class="a">Device-GRE</span></td><td>No</td><td>Gathered, reordered, early-ack</td><td>No</td><td>High-throughput I/O (graphics buffers)</td></tr>
+    <tr><td><span class="a">Device-nGRE</span></td><td>No</td><td>Reordered, early-ack</td><td>No</td><td>Less permissive I/O</td></tr>
+    <tr><td><span class="a">Device-nGnRE</span></td><td>No</td><td>Early-ack only</td><td>No</td><td>Typical peripherals (GIC, UART)</td></tr>
+    <tr><td><span class="a">Device-nGnRnE</span></td><td>No</td><td>None</td><td>No</td><td>Strictly-ordered — legacy "strongly-ordered"</td></tr>
+  </table>
+  <p class="small">"nG" = non-Gathering, "nR" = non-Reordering, "nE" = no Early write-ack. "Normal" memory also has an Inner &amp; Outer cache policy (WB-WA, WT, NC). These are all encoded in an 8-bit <strong>MAIR_ELx</strong> slot, and the PTE picks a slot by 3-bit <span class="mono">AttrIndx</span>.</p>
+  <div class="card amber" style="margin-top:0.4em;">
+    <p><strong>MAIR indirection</strong> means the attribute table can be rewritten once and all page-table entries immediately pick up the new meaning — very useful for quickly switching between write-through and write-back without touching every PTE.</p>
+  </div>
+</section>
+
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr"><span class="tag">08</span><h2>Cache Hierarchy in a Modern Cortex-A SoC</h2></div>
+  <div class="cols cols-2">
+    <div>
+      <svg viewBox="0 0 340 280" style="width:100%;">
+        <rect x="10" y="10" width="320" height="260" rx="10" fill="#10101a" stroke="#f5a623"/>
+        <text x="170" y="32" text-anchor="middle" fill="#f5a623" font-family="Playfair Display" font-weight="700" font-size="13">Modern Cortex-A cache hierarchy</text>
+
+        <rect x="30"  y="50" width="65" height="30" rx="4" fill="#2a1a0a" stroke="#f5a623"/>
+        <text x="62" y="70" text-anchor="middle" fill="#f5a623" font-family="JetBrains Mono" font-size="9">L1-I</text>
+        <rect x="100" y="50" width="65" height="30" rx="4" fill="#2a1a0a" stroke="#f5a623"/>
+        <text x="132" y="70" text-anchor="middle" fill="#f5a623" font-family="JetBrains Mono" font-size="9">L1-D</text>
+        <text x="225" y="70" fill="#8888a8" font-family="JetBrains Mono" font-size="9">per-core, 32-64 KB</text>
+
+        <rect x="30" y="95" width="135" height="30" rx="4" fill="#1a2540" stroke="#60a5fa"/>
+        <text x="97" y="115" text-anchor="middle" fill="#60a5fa" font-family="JetBrains Mono" font-size="9">L2 (per core)</text>
+        <text x="225" y="115" fill="#8888a8" font-family="JetBrains Mono" font-size="9">256 KB – 3 MB</text>
+
+        <rect x="30" y="140" width="285" height="40" rx="4" fill="#1f3a1f" stroke="#4ecb8d"/>
+        <text x="172" y="165" text-anchor="middle" fill="#4ecb8d" font-family="JetBrains Mono" font-size="10">L3 — DynamIQ Shared Unit (DSU)</text>
+
+        <rect x="30" y="195" width="285" height="35" rx="4" fill="#2a1a2a" stroke="#a78bfa"/>
+        <text x="172" y="218" text-anchor="middle" fill="#a78bfa" font-family="JetBrains Mono" font-size="10">SLC — System Level Cache (CMN mesh)</text>
+
+        <rect x="30" y="245" width="285" height="20" rx="3" fill="#0e0e18" stroke="#555"/>
+        <text x="172" y="259" text-anchor="middle" fill="#cdd6f4" font-family="JetBrains Mono" font-size="9">DRAM (LPDDR5X, DDR5, HBM)</text>
+      </svg>
+    </div>
+    <div>
+      <ul>
+        <li><strong class="a">L1-I / L1-D</strong> — split Harvard, per-core. Usually 32-64 KB, 2-4-way. VIPT tag (virtually-indexed, physically-tagged) — avoids synonyms.</li>
+        <li><strong class="b">L2</strong> — per core in modern cores (A76 onwards). 256 KB-3 MB. Inclusive or mostly-inclusive of L1.</li>
+        <li><strong class="g">L3 (DSU)</strong> — shared by the whole DynamIQ cluster. Up to 16 MB. Managed by the DSU.</li>
+        <li><strong class="p">SLC (System Level Cache)</strong> — attached to the CMN mesh/NoC. Sits on the path from cluster to DRAM. Shared with GPU, NPU, display.</li>
+        <li>Line size is <strong>64 bytes</strong> across the whole A-profile family.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr"><span class="tag">09</span><h2>PoU vs PoC vs PoPS</h2></div>
+  <div class="cols cols-2">
+    <div>
+      <ul>
+        <li><strong class="a">Point of Unification (PoU)</strong> — the level where I-cache and D-cache see the same data. Usually L2 or L3. Required for self-modifying code: after writing to memory, clean D-cache to PoU + invalidate I-cache to PoU.</li>
+        <li><strong class="a">Point of Coherency (PoC)</strong> — the level where all coherent masters see the same data. Usually the SLC or just before DRAM. Required for DMA &amp; non-coherent masters.</li>
+        <li><strong class="a">Point of Persistence (PoPS)</strong> — Armv8.2 addition for non-volatile memory (NVDIMM, battery-backed). Not widely used on mobile.</li>
+      </ul>
+    </div>
+    <div>
+      <pre><code class="nohighlight">// JIT compiler flushes after writing code
+// (write-then-execute pattern)
+
+bl    generate_code        // builds into [x0 .. x0+len]
+mov   x2, x0               // save base
+
+1:  dc    cvau, x2         // clean D to PoU
+    add   x2, x2, #64
+    cmp   x2, x3
+    b.lo  1b
+dsb   ish                  // wait for cleans
+
+ic    ivau, x0             // invalidate I to PoU (by VA)
+dsb   ish
+isb                        // restart fetch
+
+br    x0                   // now safe to execute
+</code></pre>
+      <p class="small dim">This sequence is what every JIT (V8, JSC, JVM) does on AArch64. Armv8.1+ cores can speed it up via <span class="mono">CTR_EL0.DIC/IDC</span> — if set, parts of the sequence are redundant.</p>
+    </div>
+  </div>
+</section>
+
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr"><span class="tag">10</span><h2>Cache Maintenance Instructions</h2></div>
+  <table>
+    <tr><th>Instruction</th><th>What it does</th><th>Typical use</th></tr>
+    <tr><td><span class="mono">IC IALLU</span></td><td>Invalidate all I-cache (local PE)</td><td>After writing code pages</td></tr>
+    <tr><td><span class="mono">IC IVAU, Xt</span></td><td>Invalidate I-cache by VA to PoU</td><td>JIT flush (see prev slide)</td></tr>
+    <tr><td><span class="mono">DC IVAC, Xt</span></td><td>Invalidate D-cache by VA to PoC</td><td>Before DMA from device → memory</td></tr>
+    <tr><td><span class="mono">DC CVAC, Xt</span></td><td>Clean D-cache by VA to PoC</td><td>Before DMA from memory → device</td></tr>
+    <tr><td><span class="mono">DC CIVAC, Xt</span></td><td>Clean &amp; invalidate by VA to PoC</td><td>Bidirectional DMA buffers</td></tr>
+    <tr><td><span class="mono">DC CVAU, Xt</span></td><td>Clean by VA to PoU</td><td>JIT flush pair with <span class="mono">IC IVAU</span></td></tr>
+    <tr><td><span class="mono">DC ZVA, Xt</span></td><td>Zero a cache line (no allocate)</td><td>memset fast-path (replaces STR #0 loop)</td></tr>
+    <tr><td><span class="mono">DC CIVAP, Xt</span></td><td>Clean &amp; invalidate to PoPS</td><td>NVDIMM flush (Armv8.2)</td></tr>
+  </table>
+  <p class="small">Set/way operations (<span class="mono">DC ISW / CSW / CISW</span>) still exist for bring-up but are discouraged — they are <em>not</em> broadcast to other PEs. For runtime flushing, always use <strong>by-VA</strong> ops.</p>
+</section>
+
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr"><span class="tag">11</span><h2>Weak Memory Ordering — the Arm Model</h2></div>
+  <div class="cols cols-2">
+    <div>
+      <ul>
+        <li>Arm A-profile is <strong>weakly ordered</strong>. The only ordering guaranteed is:
+          <ul>
+            <li>Same-address load→load (coherence)</li>
+            <li>Same-address write→read (SC-PO to same location)</li>
+            <li>Dependency ordering (address/data dep preserves program order for the dependent access)</li>
+          </ul>
+        </li>
+        <li>Everything else — load→store, store→store, unrelated load→load — can be <strong>reordered</strong> by hardware.</li>
+        <li>Programmer recovers ordering with:
+          <ul>
+            <li><strong>Barriers</strong> — <span class="mono">DMB / DSB / ISB</span></li>
+            <li><strong>Release/acquire</strong> — <span class="mono">LDAR / STLR</span></li>
+            <li><strong>LSE atomics</strong> (Armv8.1) with acquire/release semantics</li>
+          </ul>
+        </li>
+      </ul>
+    </div>
+    <div>
+      <div class="card amber">
+        <h3>"Load buffering" litmus test</h3>
+        <p>Two cores: P0 does <span class="mono">LDR r1, [A]; STR r2, [B]</span>; P1 does <span class="mono">LDR r3, [B]; STR r4, [A]</span>. Can both loads see initial zero and both stores succeed? On x86: no. On Arm: <strong>yes</strong> — loads can be reordered with later stores.</p>
+      </div>
+      <div class="card blue" style="margin-top:0.4em;">
+        <h3 class="b">Use release/acquire, not barriers</h3>
+        <p>Idiomatic AArch64 code uses <span class="mono">LDAR/STLR</span> — the acquire/release semantics pair with the CPU's own store buffer, no separate fence needed. Barriers become rare in modern code.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr"><span class="tag">12</span><h2>DMB / DSB / ISB — The Barrier Zoo</h2></div>
+  <table>
+    <tr><th>Barrier</th><th>Scope</th><th>Semantics</th><th>Typical use</th></tr>
+    <tr><td><span class="mono">DMB ISH</span></td><td>Inner Shareable</td><td>All cores in cluster see loads/stores in order</td><td>Lock fence, spinlock release</td></tr>
+    <tr><td><span class="mono">DMB ISHLD</span></td><td>ISH, loads only</td><td>Load→load ordering only</td><td>Read-side of RCU</td></tr>
+    <tr><td><span class="mono">DMB ISHST</span></td><td>ISH, stores only</td><td>Store→store ordering only</td><td>Write-combining flush</td></tr>
+    <tr><td><span class="mono">DSB ISH</span></td><td>ISH, system-wide</td><td>All prior mem accesses + caches complete</td><td>After TLBI / IC / DC</td></tr>
+    <tr><td><span class="mono">DSB OSH</span></td><td>Outer Shareable</td><td>Also includes devices on outer side</td><td>DMA start synchronisation</td></tr>
+    <tr><td><span class="mono">DSB SY</span></td><td>System</td><td>Full system barrier</td><td>Boot, rare</td></tr>
+    <tr><td><span class="mono">ISB</span></td><td>Local PE</td><td>Instruction Synchronisation — context-synchronising</td><td>After system-register write, after cache maintenance</td></tr>
+  </table>
+  <p class="small">Rule of thumb: <strong>DMB</strong> orders memory accesses; <strong>DSB</strong> also waits for them; <strong>ISB</strong> flushes the pipeline so subsequent fetches see new state. Nearly every use of these on modern systems can be replaced by <span class="mono">LDAR/STLR/CAS</span>.</p>
+</section>
+
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr"><span class="tag">13</span><h2>LSE Atomics (Armv8.1-A)</h2></div>
+  <div class="cols cols-2">
+    <div>
+      <ul>
+        <li>Before LSE, atomic ops were a <span class="mono">LDXR / STXR</span> loop — "Load-Linked / Store-Conditional". Under contention it can livelock.</li>
+        <li><strong>LSE — Large System Extension</strong> — adds single-instruction atomics that scale to many-core.</li>
+        <li>Each takes <strong>acquire (A) / release (L) / acquire+release (AL) / plain</strong> variants — so ordering is baked in.</li>
+        <li>Under the hood, big SMP systems implement LSE as a <strong>near-atomic</strong> sent to the Home Node (HN-F) in CHI — the cache-line's "owner" executes the RMW without the requester needing to own the line.</li>
+        <li>Kernel compiles to LSE when present (<span class="mono">-moutline-atomics</span> produces a runtime picker).</li>
+      </ul>
+    </div>
+    <div>
+      <pre><code class="nohighlight">// LSE atomics — all AArch64-only, Armv8.1-A+
+
+cas    w0, w1, [x2]        // compare-and-swap
+casal  w0, w1, [x2]        // CAS acquire+release
+swp    w0, w1, [x2]        // SWP: atomic exchange
+
+ldadd  w0, w1, [x2]        // atomic fetch-add
+ldaxr  / ldxr             // legacy exclusive load
+
+// Idiomatic acquire-semantics spinlock using CAS
+acquire:
+    mov   w3, #1
+1:  mov   w1, wzr
+    casa  w1, w3, [x0]     // CAS acquire: expect 0, set 1
+    cbnz  w1, 1b           // retry until free
+    ret
+
+release:
+    stlr  wzr, [x0]        // release-store clears
+    ret
+</code></pre>
+    </div>
+  </div>
+</section>
+
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr"><span class="tag">14</span><h2>Producer / Consumer — Release &amp; Acquire in Practice</h2></div>
+  <div class="cols cols-2">
+    <div>
+      <pre><code class="nohighlight">// Classic "publish data, then flag" pattern
+
+// Producer (core A):
+//   data is filled in, then published
+str   x0, [data_ptr]       // 1: write data
+stlr  w1, [flag]           // 2: release-store flag=1
+
+// Consumer (core B):
+//   spin on flag, then read data
+1:  ldar  w2, [flag]       // acquire-load
+    cbz   w2, 1b           // loop until non-zero
+ldr   x3, [data_ptr]       // safe: sees the pre-STLR write
+</code></pre>
+    </div>
+    <div>
+      <ul>
+        <li>The <span class="mono">STLR</span> in step 2 has <strong>release semantics</strong>: no prior store by this core may be reordered past it.</li>
+        <li>The <span class="mono">LDAR</span> in step 1 of the consumer has <strong>acquire semantics</strong>: no subsequent load may be reordered before it.</li>
+        <li>Together, <strong>the STLR-LDAR pair creates a happens-before edge</strong> — the consumer is guaranteed to see the producer's earlier <span class="mono">STR x0, [data_ptr]</span>.</li>
+        <li>Without release/acquire this program is <em>racy</em> on Arm — the consumer can read stale data. On x86 it happens to work because x86 is TSO.</li>
+        <li>C++ <span class="mono">memory_order_release / memory_order_acquire</span> maps exactly to STLR / LDAR on AArch64.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr"><span class="tag">15</span><h2>Prefetch &amp; PRFM</h2></div>
+  <div class="cols cols-2">
+    <div>
+      <ul>
+        <li><span class="mono">PRFM</span> — hint to the caches; no architectural effect.</li>
+        <li>Encoded <strong>target × type × locality</strong>:
+          <ul>
+            <li>Target: PLD (load) / PLI (instruction) / PST (store)</li>
+            <li>Type: L1 / L2 / L3</li>
+            <li>Locality: KEEP / STRM (streaming — hint cache it briefly)</li>
+          </ul>
+        </li>
+        <li>Hardware prefetchers also run in parallel — strided, stream, and increasingly <strong>Data-Dependent</strong> prefetchers in Cortex-X4+.</li>
+        <li>In modern workloads (DB hashing, graph traversal) explicit PRFM still wins by 10-20% even with a good HW prefetcher.</li>
+      </ul>
+    </div>
+    <div>
+      <pre><code class="nohighlight">// Linked-list walk with manual prefetch
+// Classic cache-miss-hiding pattern
+
+walk:
+    ldr   x1, [x0, #NEXT]     // load next
+    cbz   x1, 2f
+    prfm  pldl1keep, [x1]     // prefetch next->next
+    ldr   x2, [x0, #DATA]     // do the work
+    bl    process_node
+    mov   x0, x1
+    b     walk
+2:  ret
+</code></pre>
+      <p class="small dim">DC ZVA is effectively a "prefetch-for-write" — it zeroes a cache line in L1 without a fill from DRAM. Used in memset / calloc fast-paths.</p>
+    </div>
+  </div>
+</section>
+
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr"><span class="tag">16</span><h2>Related Decks</h2></div>
+  <div class="cols cols-2">
+    <div>
+      <ul>
+        <li><a href="https://brendanjameslynskey.github.io/AMBA/03-axi-deep-dive/" style="color:var(--blue);">AMBA 03 — AXI Deep Dive</a> — the bus that carries every cache-line refill.</li>
+        <li><a href="https://brendanjameslynskey.github.io/AMBA/04-ace-coherency/" style="color:var(--blue);">AMBA 04 — ACE &amp; ACE-Lite</a> — coherent transactions, MOESI on AXI.</li>
+        <li><a href="https://brendanjameslynskey.github.io/AMBA/05-chi-scalable-coherency/" style="color:var(--blue);">AMBA 05 — CHI Coherency</a> — what the SLC and snoop filter look like at the mesh level.</li>
+        <li><a href="https://brendanjameslynskey.github.io/Cortex_M/04-memory-mpu/" style="color:var(--blue);">Cortex-M 04 — MPU &amp; Memory</a> — contrast with the region-based M-profile model.</li>
+      </ul>
+    </div>
+    <div>
+      <div class="card amber">
+        <h3>Key takeaways</h3>
+        <ul>
+          <li>Weak memory model is the single most-tripped-up topic on Arm interviews — know STLR / LDAR / LSE.</li>
+          <li>PoU vs PoC is the JIT &amp; DMA test. Memorise the "clean to PoU, invalidate I to PoU" sequence.</li>
+          <li>Know what ASID does and why <span class="mono">nG=0</span> kernel entries avoid ASID tagging.</li>
+          <li>TTBR0 vs TTBR1 split lets Linux keep a single kernel page-table across all processes.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr"><span class="tag">17</span><h2>Lessons for the Interview</h2></div>
+  <div class="cols cols-2">
+    <div>
+      <ul>
+        <li><strong class="a">"Why tagged TLB with ASID?"</strong> → avoids flushing user entries on context switch; cut switch cost from hundreds of cycles to near zero.</li>
+        <li><strong class="a">"What's the difference between PoU and PoC?"</strong> → PoU is where I and D caches see the same data (for self-modifying code); PoC is where everyone, including DMA masters, sees the same data.</li>
+        <li><strong class="a">"Why does Linux use 4 KB granule mostly?"</strong> → x86 compat, small-page granularity for fine-grained mmap. Apple chose 16 KB for better TLB coverage and fewer page-table levels.</li>
+      </ul>
+    </div>
+    <div>
+      <ul>
+        <li><strong class="g">"Why LSE atomics?"</strong> → LDXR/STXR livelocks under heavy contention; LSE sends a single RMW to the cache-line's home node, scaling to 64+ cores.</li>
+        <li><strong class="g">"Explain a spinlock on AArch64"</strong> → CAS acquire to take, STLR to release, WFE while parked; avoids contended LL/SC livelock.</li>
+        <li><strong class="g">"When is a DSB needed?"</strong> → after TLBI or IC/DC maintenance, to ensure it's globally observable before the ISB; rarely needed for plain data ordering (use release/acquire).</li>
+        <li><strong class="g">"What is TBI?"</strong> → Top Byte Ignore — CPU ignores bits [63:56] of a VA on access. Enables MTE tags and HWASAN.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr"><span class="tag">18</span><h2>References</h2></div>
+  <div style="max-width:90%;margin:0 auto;font-size:0.58em;line-height:1.8;">
+    <p>
+      <strong class="a">Arm Ltd.</strong> — <em>DDI 0487</em> — VMSA, ordering, cache chapters<br>
+      <strong class="a">Arm Ltd.</strong> — <em>Learn the architecture: AArch64 memory management</em> — free, well-written walkthrough<br>
+      <strong class="a">Arm Ltd.</strong> — <em>Cache maintenance</em> application note — by-VA vs set/way operations<br>
+      <strong class="a">McKenney, Paul E.</strong> — <em>Is Parallel Programming Hard, And, If So, What Can You Do About It?</em> — RCU author, covers Arm memory model<br>
+      <strong class="a">Alglave, Maranget, Tautschnig</strong> — &quot;Herding cats: Modelling, simulation, testing, and data-mining for weak memory&quot; (ACM TOPLAS 2014) — Arm memory model formalisation<br>
+      <strong class="a">Linux kernel — <span class="mono">Documentation/arm64/memory.rst</span></strong> — layout &amp; ASID notes<br>
+      <strong class="a">Linux kernel — <span class="mono">arch/arm64/include/asm/atomic_lse.h</span></strong> — LSE atomic implementations<br>
+      <strong class="a">Preshing, Jeff</strong> — preshing.com — excellent memory-ordering intuition pieces
+    </p>
+    <p style="color:var(--muted);margin-top:0.8em;font-size:0.85em">
+      Presentation built with <a href="https://revealjs.com">Reveal.js 4.6</a> · Playfair Display + DM Sans + JetBrains Mono<br>
+      Educational use.
+    </p>
+  </div>
+</section>
+
+</div></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/reveal.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/plugin/highlight/highlight.min.js"></script>
+<script>
+Reveal.initialize({ hash: true, slideNumber: 'c/t', transition: 'fade', transitionSpeed: 'fast', controls: true, progress: true, center: false, width: 1100, height: 900, margin: 0.01, plugins: [RevealHighlight], highlight: { theme: 'monokai' } });
+</script>
+<script>
+(function(){ var h = Reveal.getConfig().height || 900; var m = Reveal.getConfig().margin || 0.02; var maxH = Math.floor(h * (1 - 2 * m)) + 'px'; function fixSlides(){ document.querySelectorAll('.reveal .slides>section,.reveal .slides>section>section').forEach(function(s){ s.style.display = 'block'; s.style.maxHeight = maxH; }); } Reveal.on('ready', fixSlides); Reveal.on('slidechanged', fixSlides); })();
+</script>
+</body>
+</html>

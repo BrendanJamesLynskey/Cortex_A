@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cortex-A Microarchitecture — OoO, DynamIQ, PMU</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@400;500;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/reveal.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/theme/black.min.css">
+<style>
+  :root { --amber:#f5a623;--green:#4ecb8d;--purple:#a78bfa;--blue:#60a5fa;--red:#f87171; --bg:#0a0a0f;--bg2:#10101a;--bg3:#181824;--border:#2a2a3a;--text:#e8e8f0;--muted:#8888a8; }
+  .reveal-viewport { background: var(--bg); }
+  .reveal .slides section { background: transparent; }
+  .reveal section { text-align: left; }
+  .reveal .slides > section { padding: 0.5em; overflow-y: auto !important; align-items: flex-start !important; justify-content: flex-start !important; }
+  .reveal .progress { color: var(--amber); height: 3px; } .reveal .controls { color: var(--amber); }
+  .reveal section::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, var(--amber), var(--green)); }
+  .reveal { font-family: 'DM Sans', sans-serif; color: var(--text); font-size: 22px; }
+  .reveal .slide-number { font-family: 'JetBrains Mono', monospace; font-size: 0.7em; color: var(--muted); }
+  .reveal h1, .reveal h2, .reveal h3 { font-family: 'Playfair Display', serif; color: #fff; text-transform: none; letter-spacing: -0.01em; }
+  .reveal h1 { font-size: 2.4em; font-weight: 900; color: var(--amber); line-height: 1.1; }
+  .reveal h2 { font-size: 1.7em; font-weight: 700; color: var(--amber); margin-bottom: 0.6em; }
+  .reveal h3 { font-size: 1.2em; font-weight: 700; color: var(--green); margin-bottom: 0.3em; }
+  .reveal p  { font-size: 0.75em; line-height: 1.5; color: var(--text); }
+  .reveal li { font-size: 0.7em; line-height: 1.5; margin-bottom: 0.25em; }
+  .reveal code { font-family: 'JetBrains Mono', monospace; font-size: .72em; }
+  .reveal pre  { background: var(--bg3); border: 1px solid var(--border); border-radius: 8px; padding: 0.5em 1em; margin: 0.4em 0; width: 100%; box-shadow: none; }
+  .reveal pre code { font-size: 0.58em; line-height: 1.5; background: transparent; color: #cdd6f4; }
+  .slide-hdr { display: flex; align-items: center; gap: .4em; border-bottom: 1px solid var(--border); padding-bottom: .2em; margin-bottom: .3em; }
+  .slide-hdr .tag { font-family: 'JetBrains Mono', monospace; font-size: 0.55em; font-weight: 600; color: var(--bg); background: var(--amber); padding: .1em .4em; border-radius: 3px; letter-spacing: .04em; }
+  .slide-hdr h2 { margin: 0; font-size: 1.4em; }
+  .cols{display:grid;gap:1em;} .cols-2{grid-template-columns:1fr 1fr;} .cols-3{grid-template-columns:1fr 1fr 1fr;} .cols-6040{grid-template-columns:6fr 4fr;} .cols-4060{grid-template-columns:4fr 6fr;}
+  .card { background: var(--bg2); border: 1px solid var(--border); border-radius: 8px; padding: 1em 1.2em; box-shadow: 0 4px 20px rgba(0,0,0,0.3); margin: 0.4em 0; }
+  .card.amber { border-left: 3px solid var(--amber); } .card.green { border-left: 3px solid var(--green); } .card.purple{ border-left: 3px solid var(--purple); } .card.blue  { border-left: 3px solid var(--blue); } .card.red   { border-left: 3px solid var(--red); }
+  .card h3 { font-size: 1em; margin: 0 0 0.4em; }
+  .card p, .card ul { font-size: 0.8em; margin: 0; color: #b8b8d0; } .card ul { padding-left: 1.2em; } .card li { font-size: 0.85em; margin-bottom: 0.25em; }
+  .reveal table { width: 100%; border-collapse: collapse; font-size: 0.65em; margin: 0.5em 0; }
+  .reveal table th { background: var(--bg3); color: var(--amber); padding: 0.5em 0.7em; border: 1px solid var(--border); text-align: left; font-weight: 700; }
+  .reveal table td { padding: 0.5em 0.7em; border: 1px solid var(--border); color: #ccc; vertical-align: top; }
+  .reveal table tr:nth-child(even) td { background: #0e0e18; }
+  .a{color:var(--amber);font-weight:600;} .g{color:var(--green);font-weight:600;} .p{color:var(--purple);font-weight:600;} .b{color:var(--blue);font-weight:600;} .r{color:var(--red);font-weight:600;} .mono{font-family:'JetBrains Mono',monospace;}
+  svg.diagram { display: block; margin: 0 auto; overflow: visible; }
+  .title-slide h1 { font-size: 2.4em; } .title-slide .subtitle { font-size: 0.85em; color: var(--green); font-weight: 400; letter-spacing: 0.06em; margin: 0.3em 0 0.6em; } .title-slide .meta { font-size: 0.6em; color: var(--muted); font-family: 'JetBrains Mono', monospace; }
+  .dim { color: var(--muted); } .small { font-size: 0.65em; } .smaller { font-size: 0.55em; } .tiny { font-size: 0.48em; }
+  .reveal ul, .reveal ol { margin: .15em 0 .15em 1em; }
+</style>
+</head>
+<body>
+<div class="reveal">
+<div class="slides">
+
+<section class="title-slide" data-background-color="#0a0a0f">
+  <div style="font-family:'JetBrains Mono',monospace;font-size:.5em;color:var(--muted);margin-bottom:.4em;letter-spacing:.1em;">ARM CORTEX-A · PRESENTATION 06</div>
+  <h1>Microarchitecture — OoO, DynamIQ, PMU</h1>
+  <div class="subtitle">From A8's in-order pipeline to X925's 10-wide OoO beast</div>
+  <div style="width:60px;height:3px;background:var(--amber);margin-bottom:1.4em;"></div>
+  <div class="meta">Fetch · Decode · Rename · ROB · Issue · L/S · Branch Prediction · DynamIQ DSU · PMU · SPE · TRBE</div>
+</section>
+
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr"><span class="tag">02</span><h2>From In-Order to Out-of-Order</h2></div>
+  <table>
+    <tr><th>Core</th><th>Decode</th><th>Issue</th><th>Stages</th><th>Comment</th></tr>
+    <tr><td>Cortex-A8</td><td>2</td><td>2 in-order</td><td>13</td><td>Baseline, no OoO</td></tr>
+    <tr><td>Cortex-A9</td><td>2</td><td>4 OoO (partial)</td><td>8-11</td><td>First Arm with register rename</td></tr>
+    <tr><td>Cortex-A15</td><td>3</td><td>8 OoO</td><td>15</td><td>First "big" OoO</td></tr>
+    <tr><td>Cortex-A57</td><td>3</td><td>8 OoO</td><td>15-17</td><td>First AArch64 big core</td></tr>
+    <tr><td>Cortex-A72</td><td>3</td><td>8 OoO</td><td>15</td><td>Refined A57, lower power</td></tr>
+    <tr><td>Cortex-A76</td><td>4</td><td>8 OoO</td><td>13</td><td>Shorter pipeline, higher IPC</td></tr>
+    <tr><td>Cortex-A78</td><td>4</td><td>8 OoO</td><td>13</td><td>Power-tuned A77</td></tr>
+    <tr><td>Cortex-X1</td><td>5</td><td>8 OoO</td><td>13</td><td>First "Custom Core"; wider front-end</td></tr>
+    <tr><td>Cortex-X4</td><td>10 dispatch</td><td>10+ OoO</td><td>~15</td><td>Largest ROB to date in X3 (~384 entries)</td></tr>
+    <tr><td>Cortex-X925</td><td>10</td><td>10+ OoO</td><td>15+</td><td>2024 "Blackhawk" — flagship width</td></tr>
+  </table>
+  <p class="small">Two trends over 20 years: <strong>wider front-ends</strong> (2 → 10 decode) and <strong>shorter pipelines</strong> (A15's 15 stages → A76's 13). Width grows IPC; shorter pipe reduces mis-predict penalty + improves branchy code.</p>
+</section>
+
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr"><span class="tag">03</span><h2>Canonical OoO Pipeline (Cortex-A78 / X1 class)</h2></div>
+  <svg viewBox="0 0 920 230" style="width:100%;">
+    <rect x="10" y="10" width="900" height="210" rx="10" fill="#10101a" stroke="#f5a623"/>
+    <text x="460" y="32" text-anchor="middle" fill="#f5a623" font-family="Playfair Display" font-size="14" font-weight="700">Cortex-A76/A78 pipeline (schematic)</text>
+
+    <g font-family="JetBrains Mono" font-size="10">
+      <rect x="30"  y="55" width="90" height="40" rx="4" fill="#2a1a0a" stroke="#f5a623"/>
+      <text x="75" y="80" text-anchor="middle" fill="#f5a623">Fetch (4W)</text>
+
+      <rect x="130" y="55" width="90" height="40" rx="4" fill="#2a1a0a" stroke="#f5a623"/>
+      <text x="175" y="73" text-anchor="middle" fill="#f5a623">Predict</text>
+      <text x="175" y="87" text-anchor="middle" fill="#cdd6f4" font-size="8">BTB/RSB/BHT</text>
+
+      <rect x="230" y="55" width="90" height="40" rx="4" fill="#2a1a0a" stroke="#f5a623"/>
+      <text x="275" y="80" text-anchor="middle" fill="#f5a623">Decode (4W)</text>
+
+      <rect x="330" y="55" width="110" height="40" rx="4" fill="#1a2540" stroke="#60a5fa"/>
+      <text x="385" y="73" text-anchor="middle" fill="#60a5fa">Rename/Dispatch</text>
+      <text x="385" y="87" text-anchor="middle" fill="#cdd6f4" font-size="8">~200-entry ROB</text>
+
+      <rect x="450" y="55" width="100" height="40" rx="4" fill="#1f3a1f" stroke="#4ecb8d"/>
+      <text x="500" y="73" text-anchor="middle" fill="#4ecb8d">Issue queue</text>
+      <text x="500" y="87" text-anchor="middle" fill="#cdd6f4" font-size="8">per unit</text>
+
+      <rect x="570" y="25" width="140" height="30" rx="4" fill="#2a1a2a" stroke="#a78bfa"/>
+      <text x="640" y="45" text-anchor="middle" fill="#a78bfa">2× ALU + MAC + DIV</text>
+
+      <rect x="570" y="60" width="140" height="30" rx="4" fill="#2a1a2a" stroke="#a78bfa"/>
+      <text x="640" y="80" text-anchor="middle" fill="#a78bfa">2× FP/SIMD (128-bit)</text>
+
+      <rect x="570" y="95" width="140" height="30" rx="4" fill="#2a1a2a" stroke="#a78bfa"/>
+      <text x="640" y="115" text-anchor="middle" fill="#a78bfa">2× Load/Store</text>
+
+      <rect x="570" y="130" width="140" height="30" rx="4" fill="#2a1a2a" stroke="#a78bfa"/>
+      <text x="640" y="150" text-anchor="middle" fill="#a78bfa">Branch unit</text>
+
+      <rect x="730" y="55" width="90" height="40" rx="4" fill="#2a0a1a" stroke="#f87171"/>
+      <text x="775" y="73" text-anchor="middle" fill="#f87171">Commit</text>
+      <text x="775" y="87" text-anchor="middle" fill="#cdd6f4" font-size="8">in-order</text>
+    </g>
+
+    <g stroke="#8888a8">
+      <line x1="120" y1="75" x2="130" y2="75"/>
+      <line x1="220" y1="75" x2="230" y2="75"/>
+      <line x1="320" y1="75" x2="330" y2="75"/>
+      <line x1="440" y1="75" x2="450" y2="75"/>
+      <line x1="550" y1="75" x2="570" y2="40"/>
+      <line x1="550" y1="75" x2="570" y2="75"/>
+      <line x1="550" y1="75" x2="570" y2="110"/>
+      <line x1="550" y1="75" x2="570" y2="145"/>
+      <line x1="710" y1="75" x2="730" y2="75"/>
+    </g>
+
+    <text x="30" y="200" fill="#8888a8" font-family="JetBrains Mono" font-size="10">
+      L1-I 64 KB / BTB ~6000 entries / RSB 16 / Tournament + TAGE-SC · L1-D 64 KB · L2 512 KB – 1 MB private
+    </text>
+  </svg>
+  <p class="small">The "big" Cortex-A pattern: 4-wide fetch/decode/rename, 8-wide issue across heterogeneous EUs, 2-3 load + store pipes, in-order commit. X-class widens this to 10-wide decode + 10+ issue.</p>
+</section>
+
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr"><span class="tag">04</span><h2>Branch Prediction — The Other Half of IPC</h2></div>
+  <div class="cols cols-2">
+    <div>
+      <ul>
+        <li><strong>BTB</strong> (Branch Target Buffer) — direct branches. Modern cores: 2-level, 2k-4k entries L0 + 16k+ entries L1.</li>
+        <li><strong>Indirect predictor</strong> — for <span class="mono">BR Xn</span>. Smaller (hundreds of entries) but often path-hashed for vtable dispatch.</li>
+        <li><strong>RSB</strong> (Return Stack Buffer) — predicts return targets. 16 entries typical. Overflows to BTB.</li>
+        <li><strong>Conditional predictor</strong> — evolved from 2-bit counters → tournament → <strong>TAGE</strong> / <strong>TAGE-SC-L</strong>. State-of-the-art as of Cortex-X4/X925.</li>
+        <li><strong>Perceptron predictor</strong> — seen in some custom cores (early AMD K10, rumoured Apple). Weighted sum of history bits.</li>
+        <li>Flow: fetch block ⇒ predict targets + directions ⇒ redirect fetch same cycle. Latency of redirect = branch mispredict penalty cycles.</li>
+      </ul>
+    </div>
+    <div>
+      <div class="card amber">
+        <h3>The mispredict cost</h3>
+        <p>On a 13-stage pipe with 4-wide fetch, a mispredict costs ~13 bubbles × 4 = 52 lost slots. A 95% accurate predictor on a branchy workload means 5% × 52 = <strong>2.6 lost slots per branch</strong> — so predictor quality is often the #1 lever for big-core IPC.</p>
+      </div>
+      <div class="card blue" style="margin-top:0.4em;">
+        <h3 class="b">TAGE in 60s</h3>
+        <p>Multiple "tagged geometric" history-length tables index by a hash of (PC, long branch history). Longest table that hits wins. Short-history &amp; bi-modal fall-back tables cover easier branches. Excellent at irregular patterns.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr"><span class="tag">05</span><h2>big.LITTLE Origins (2011-2017)</h2></div>
+  <div class="cols cols-2">
+    <div>
+      <ul>
+        <li>2011: <strong>Cortex-A15 + A7</strong> pairing — first big.LITTLE. A15 was a power-hog OoO, A7 a tiny in-order.</li>
+        <li>Coherency glue: <strong>CCI-400</strong> (ACE-based Cache Coherent Interconnect) kept the two clusters' L2 caches coherent when threads migrated.</li>
+        <li>Three operation modes:
+          <ul>
+            <li><strong>Cluster Migration (CM)</strong> — all cores in one cluster at a time</li>
+            <li><strong>CPU Migration (IKS)</strong> — pair each A15 with an A7, only one runs</li>
+            <li><strong>Global Task Scheduling (GTS)</strong> — Linux sees all cores; scheduler migrates freely</li>
+          </ul>
+        </li>
+        <li>Problems: migration latency (&gt;100 µs), OS scheduler bugs, two fixed clusters ⇒ rigid SKUs. iOS never adopted big.LITTLE — Apple went straight to a single-cluster heterogeneous design.</li>
+      </ul>
+    </div>
+    <div>
+      <table>
+        <tr><th>big + LITTLE pair</th><th>Year</th></tr>
+        <tr><td>A15 + A7</td><td>2011-14</td></tr>
+        <tr><td>A57 + A53</td><td>2014-16</td></tr>
+        <tr><td>A72 + A53</td><td>2015-16</td></tr>
+        <tr><td>A73 + A53</td><td>2016-17</td></tr>
+      </table>
+      <div class="card red" style="margin-top:0.4em;">
+        <h3 class="r">Why this had to end</h3>
+        <p>Phones wanted 3 or 4 performance tiers (ultra-big / big / mid / little), not 2. Two fixed clusters don't scale. Hence: DynamIQ.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr"><span class="tag">06</span><h2>DynamIQ Shared Unit (DSU) — 2017 onwards</h2></div>
+  <div class="cols cols-2">
+    <div>
+      <ul>
+        <li>Launched with <strong>Cortex-A75 / A55</strong> in 2017. Replaces big.LITTLE's two-cluster model.</li>
+        <li><strong>One cluster</strong> containing up to 8 (DSU-110) or 14 (DSU-120) cores of <strong>mixed type</strong>.</li>
+        <li>Integrates:
+          <ul>
+            <li>Snoop filter + SCU (coherence)</li>
+            <li>L3 cache — up to 16 MB shared across the cluster</li>
+            <li>Asynchronous bridges to the SoC fabric (CMN mesh, NIC, GIC)</li>
+            <li>Per-core DVFS domains — each core has its own clock + voltage</li>
+          </ul>
+        </li>
+        <li>Typical 2024 flagship cluster: <strong>1 × Cortex-X925 + 3 × A725 + 4 × A520</strong> on a DSU-120.</li>
+        <li>Latency between any two cores' L1 is one DSU snoop — dramatically lower than CCI-400 inter-cluster latency.</li>
+      </ul>
+    </div>
+    <div>
+      <table>
+        <tr><th>DSU version</th><th>Year</th><th>Max cores</th><th>Max L3</th><th>Shipping in</th></tr>
+        <tr><td>DSU (v0)</td><td>2017</td><td>8</td><td>4 MB</td><td>Kirin 970, Snapdragon 845</td></tr>
+        <tr><td>DSU-110</td><td>2021</td><td>8</td><td>16 MB</td><td>Snapdragon 8 Gen 1/2</td></tr>
+        <tr><td>DSU-120</td><td>2023</td><td>14</td><td>32 MB</td><td>Dimensity 9300, Cortex-X4 platform</td></tr>
+        <tr><td>DSU-120AE</td><td>2024</td><td>14</td><td>32 MB</td><td>Automotive — ASIL-B/D</td></tr>
+      </table>
+      <div class="card green" style="margin-top:0.4em;">
+        <h3 class="g">CHI egress</h3>
+        <p>DSU speaks AMBA 5 <strong>CHI</strong> out to the CMN mesh / NIC-700. That's the clean interface to the rest of the SoC.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr"><span class="tag">07</span><h2>Thermal &amp; Power — Why 1+3+4</h2></div>
+  <div class="cols cols-2">
+    <div>
+      <ul>
+        <li>Modern phone SoCs have <strong>~5-7 W</strong> sustained power budgets. Bursts to 12 W cause thermal throttling within ~30 s.</li>
+        <li>Benchmarks (Geekbench, Antutu) run single-thread peaks → <strong>X-cores</strong> are for &lt; 1-second bursts.</li>
+        <li>Day-to-day browsing &amp; app scrolling uses 1-3 <strong>mid</strong> cores — sustained efficiency zone.</li>
+        <li>Background work (notifications, network, music) runs on <strong>little</strong> cores at 1-2× lower W/perf.</li>
+        <li>The schedule mapping happens through Android <strong>EAS</strong> (Energy Aware Scheduling) which models each core's capacity and energy curve.</li>
+        <li>Thermal headroom is what the next-generation wars are being fought over. Dimensity 9300 dropped little cores entirely (3 × X4 + 4 × A720) to maximise peak; criticised for sustained battery life.</li>
+      </ul>
+    </div>
+    <div>
+      <div class="card amber">
+        <h3>DVFS = voltage / frequency scaling</h3>
+        <p>Per-core DVFS lets the SoC run one X at 3.8 GHz while four A520s sit at 1.0 GHz. Huge energy win versus the old "all cores same freq" models.</p>
+      </div>
+      <div class="card purple" style="margin-top:0.4em;">
+        <h3 class="p">AMU — Activity Monitors (v8.4)</h3>
+        <p>Architectural counters the OS can read to estimate perf/watt without proprietary telemetry. Feeds Linux <span class="mono">utilclamp</span> and EAS decisions.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr"><span class="tag">08</span><h2>PMU — Performance Monitoring</h2></div>
+  <div class="cols cols-2">
+    <div>
+      <ul>
+        <li>Armv8-A PMU: <strong>1 cycle counter</strong> (<span class="mono">PMCCNTR_EL0</span>) + <strong>6 programmable counters</strong> (<span class="mono">PMEVCNTR0-5_EL0</span>) per PE.</li>
+        <li>Events selected via <span class="mono">PMEVTYPER</span> — hundreds of events (cache misses, BP mispredicts, stalls, retired instructions).</li>
+        <li>Common events:
+          <ul>
+            <li><span class="mono">CPU_CYCLES</span>, <span class="mono">INST_RETIRED</span></li>
+            <li><span class="mono">L1D_CACHE / L1D_CACHE_REFILL</span></li>
+            <li><span class="mono">BR_MIS_PRED_RETIRED</span></li>
+            <li><span class="mono">STALL_FRONTEND / STALL_BACKEND</span></li>
+            <li>Topdown Armv8.8-A events (<span class="mono">BAD_SPEC</span> etc.) for Intel-style topdown analysis</li>
+          </ul>
+        </li>
+        <li>Linux <span class="mono">perf</span> and Android <span class="mono">simpleperf</span> both consume PMU directly.</li>
+      </ul>
+    </div>
+    <div>
+      <pre><code class="nohighlight">// Program PMU counter 0 = L1 D-cache miss
+msr   pmselr_el0, xzr            // select counter 0
+msr   pmxevtyper_el0, #0x03      // L1D_CACHE_REFILL
+msr   pmcntenset_el0, #1         // enable counter 0
+
+// Run workload...
+
+msr   pmcntenclr_el0, #1         // disable
+mrs   x0, pmxevcntr_el0          // read count
+
+// Linux equivalent
+// $ perf stat -e l1d_cache_refill ./bench
+</code></pre>
+      <p class="small dim">v8.6 adds <strong>MPMM</strong> (Multi-PMU virtualization) so a guest can have its own PMU view.</p>
+    </div>
+  </div>
+</section>
+
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr"><span class="tag">09</span><h2>SPE — Statistical Profiling Extension (v8.2)</h2></div>
+  <div class="cols cols-2">
+    <div>
+      <ul>
+        <li>PMU counts <em>events</em> in aggregate. SPE <strong>samples individual executed operations</strong> — like Intel PEBS, AMD IBS.</li>
+        <li>Every Nth retired µop writes a <strong>sample record</strong> to a dedicated memory buffer:
+          <ul>
+            <li>Instruction PC + virtual address of any memory reference</li>
+            <li>Latency of that operation</li>
+            <li>Outcome (hit / miss / TLB miss / fault / mispredict)</li>
+          </ul>
+        </li>
+        <li>Enables:
+          <ul>
+            <li><strong>Accurate per-instruction attribution</strong> of cache misses, mispredicts, TLB misses</li>
+            <li><strong>Cycle counting histograms</strong> per source line</li>
+            <li><strong>Data-reference profiling</strong> for memory layout optimisation</li>
+          </ul>
+        </li>
+        <li>Linux <span class="mono">perf record -e arm_spe//</span> harvests the buffer.</li>
+      </ul>
+    </div>
+    <div>
+      <div class="card green">
+        <h3 class="g">Why this matters in HPC/ML</h3>
+        <p>Knowing "this kernel has 5% L3 miss rate" is nearly useless. Knowing "<span class="mono">x[i][j]</span> at <span class="mono">matmul.c:47</span> causes 90% of L3 misses and costs 200 cycles each" is actionable. SPE closes that gap on Arm.</p>
+      </div>
+      <div class="card blue" style="margin-top:0.4em;">
+        <h3 class="b">ETE / TRBE (v8.4 / v9)</h3>
+        <p>Successor to ETM — stores program trace in a <strong>TRBE</strong> buffer in DRAM. Real-time, non-invasive. Used for post-mortem kernel crash analysis.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr"><span class="tag">10</span><h2>L1 / L2 / L3 Cache Sizes Over Generations</h2></div>
+  <table>
+    <tr><th>Core</th><th>L1-I/D</th><th>L2 (private)</th><th>L3 (DSU)</th></tr>
+    <tr><td>A8</td><td>32 KB / 32 KB</td><td>0-1 MB shared</td><td>-</td></tr>
+    <tr><td>A15</td><td>32 KB / 32 KB</td><td>cluster-shared, up to 4 MB</td><td>-</td></tr>
+    <tr><td>A57</td><td>48 KB / 32 KB</td><td>cluster-shared 1-2 MB</td><td>-</td></tr>
+    <tr><td>A72</td><td>48 KB / 32 KB</td><td>cluster-shared 1-2 MB</td><td>-</td></tr>
+    <tr><td>A76</td><td>64 KB / 64 KB</td><td>256 KB-512 KB private</td><td>up to 4 MB</td></tr>
+    <tr><td>A78</td><td>64 KB / 64 KB</td><td>256 KB-512 KB</td><td>up to 8 MB</td></tr>
+    <tr><td>X1</td><td>64 KB / 64 KB</td><td>up to 1 MB</td><td>up to 8 MB</td></tr>
+    <tr><td>X4 / A720</td><td>64 KB / 64 KB</td><td>2 MB / 512 KB-1 MB</td><td>up to 32 MB (DSU-120)</td></tr>
+    <tr><td>X925 / A725</td><td>64 KB / 64 KB</td><td>3 MB / 1 MB</td><td>up to 32 MB</td></tr>
+  </table>
+  <p class="small">Two big shifts: (1) <strong>2018 — L2 became private</strong>, matched with introduction of the shared L3 in DSU. (2) <strong>2023 — L2 exploded to 2-3 MB per X-core</strong>, approaching laptop-class sizes.</p>
+</section>
+
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr"><span class="tag">11</span><h2>Load/Store Unit — the Quiet Bottleneck</h2></div>
+  <div class="cols cols-2">
+    <div>
+      <ul>
+        <li>Modern big Cortex-A: <strong>2 load + 2 store pipes</strong> (X1+ has 3 load).</li>
+        <li>Store buffer: 40-60 entries. Coalesces consecutive stores to same line before committing to L1.</li>
+        <li>Memory dependency prediction — speculates whether a load depends on an earlier store in the queue. Mispredict → replay the load.</li>
+        <li><strong>DSB stagger</strong> — when a real <span class="mono">DSB</span> drains the store queue, it blocks the pipeline for tens of cycles. One reason release/acquire is preferred.</li>
+        <li>Atomic fast-path: LSE atomics (<span class="mono">CAS</span>, <span class="mono">LDADD</span>) bypass the store queue and go straight to the cache controller with a near-atomic request.</li>
+      </ul>
+    </div>
+    <div>
+      <div class="card amber">
+        <h3>DC ZVA — the allocate-without-read trick</h3>
+        <p>Allocates a cache line in L1 without an initial fill from DRAM; then writes <strong>zero</strong> into the whole line. Used in <span class="mono">memset(0)</span>, <span class="mono">calloc</span>, <span class="mono">page zeroing</span>. Often 3-5× faster than a STR #0 loop.</p>
+      </div>
+      <div class="card blue" style="margin-top:0.4em;">
+        <h3 class="b">STP pair-ops</h3>
+        <p><span class="mono">STP Xn, Xm, [sp,#-16]!</span> is a single µop that writes 16 bytes. Why every function prologue/epilogue on AArch64 uses STP/LDP — double the store width.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr"><span class="tag">12</span><h2>What the Compiler Sees — ACLE &amp; Attributes</h2></div>
+  <div class="cols cols-2">
+    <div>
+      <ul>
+        <li>Tuning switches — compiler picks instruction scheduling &amp; feature subsets per core:
+          <ul>
+            <li><span class="mono">-mcpu=cortex-x4</span></li>
+            <li><span class="mono">-mcpu=neoverse-v2</span></li>
+            <li><span class="mono">-march=armv9-a+sve2+bf16</span></li>
+          </ul>
+        </li>
+        <li>Function-level hints:
+          <ul>
+            <li><span class="mono">__attribute__((target("sve")))</span> — dispatch-by-target</li>
+            <li><span class="mono">__builtin_prefetch(p, rw, locality)</span> → PRFM</li>
+            <li><span class="mono">__builtin_arm_mte</span> — MTE intrinsics</li>
+          </ul>
+        </li>
+        <li>Pragma-level: <span class="mono">#pragma GCC ivdep</span>, <span class="mono">#pragma clang loop vectorize(enable)</span>.</li>
+      </ul>
+    </div>
+    <div>
+      <pre><code class="nohighlight">// Compiler-targeted optimisation
+
+// Force SVE code-gen path
+__attribute__((target("+sve")))
+float sve_dot(const float *a, const float *b, size_t n) {
+  // compiler will emit VLA SVE loop
+  ...
+}
+
+// Prefetch hint
+for (size_t i = 0; i &lt; n; i += 64) {
+  __builtin_prefetch(&amp;arr[i + 128], 0, 0); // PRFM pldl1strm
+  process(&amp;arr[i]);
+}
+
+// Runtime dispatch (outline atomics style)
+ifunc impl = runtime_has_sve() ? sve_kernel : neon_kernel;
+</code></pre>
+    </div>
+  </div>
+</section>
+
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr"><span class="tag">13</span><h2>Neoverse Heritage — Cortex-A → Server</h2></div>
+  <div class="cols cols-2">
+    <div>
+      <ul>
+        <li>Every Neoverse core is a re-characterised Cortex-A:
+          <ul>
+            <li><strong>Neoverse N1</strong> = Cortex-A76 (2018)</li>
+            <li><strong>Neoverse V1</strong> = Cortex-X1 + 2×256-bit SVE (2021)</li>
+            <li><strong>Neoverse N2</strong> = Cortex-A710 (v9-A)</li>
+            <li><strong>Neoverse V2</strong> = Cortex-X3 + 4×128-bit SVE (2022)</li>
+            <li><strong>Neoverse V3 / N3</strong> (2024) — shares front-end DNA with X4 / A720</li>
+          </ul>
+        </li>
+        <li>Server-side changes:
+          <ul>
+            <li>Dedicated CMN mesh (not DSU)</li>
+            <li>RAS, MPAM, SBSA compliance</li>
+            <li>More L2 + SLC, wider memory I/F (DDR5 / HBM)</li>
+          </ul>
+        </li>
+        <li>See the <a href="https://github.com/BrendanJamesLynskey/Neoverse" style="color:var(--blue);">Neoverse Presentation Series</a> for the server story.</li>
+      </ul>
+    </div>
+    <div>
+      <div class="card amber">
+        <h3>Why a common core</h3>
+        <p>Sharing microarchitecture between Cortex-A and Neoverse amortises R&amp;D across mobile + server markets — Arm ships &gt; 100 M phones per quarter and &gt; 10 M server cores per year off the same design dollars.</p>
+      </div>
+      <div class="card green" style="margin-top:0.4em;">
+        <h3 class="g">Custom licensees</h3>
+        <p>Apple, Qualcomm Nuvia/Oryon, Ampere AmpereOne, and AWS Graviton 4 all run the <em>Arm ISA</em> but implement their own microarchitecture. None of these use Cortex-A RTL.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr"><span class="tag">14</span><h2>Series Finale — Putting It All Together</h2></div>
+  <div class="cols cols-2">
+    <div>
+      <ul>
+        <li>Across the 6 decks:
+          <ul>
+            <li><strong>01 History</strong> — why the family looks the way it does</li>
+            <li><strong>02 Architecture</strong> — ELs, A64, system regs</li>
+            <li><strong>03 Memory</strong> — VMSA, caches, ordering, atomics</li>
+            <li><strong>04 Vectors</strong> — NEON → SVE → SVE2 → SME</li>
+            <li><strong>05 Security</strong> — TrustZone, EL2, PAC/BTI/MTE, CCA</li>
+            <li><strong>06 Microarchitecture</strong> — OoO, DynamIQ, PMU</li>
+          </ul>
+        </li>
+        <li>Together they cover what a phone/SoC/kernel Arm engineer is expected to know in an interview loop — and what a Neoverse engineer needs before deck 01 of that series.</li>
+      </ul>
+    </div>
+    <div>
+      <div class="card amber">
+        <h3>What I'd study next</h3>
+        <ul>
+          <li><strong>AMBA series</strong> — everything below the core (AXI, ACE, CHI)</li>
+          <li><strong>Neoverse series</strong> — same cores, server deployment</li>
+          <li><strong>Arm System IP series</strong> — GIC, SMMU, DSU, MPAM</li>
+          <li><strong>Modern SoC Design series</strong> — packaging, chiplets, SerDes, CXL</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr"><span class="tag">15</span><h2>Lessons for the Interview</h2></div>
+  <div class="cols cols-2">
+    <div>
+      <ul>
+        <li><strong class="a">"Why did A76 shorten the pipeline vs A72?"</strong> → higher IPC + lower mispredict cost + 7 nm process allowed physical designs with fewer stages at same clock.</li>
+        <li><strong class="a">"Explain DynamIQ vs big.LITTLE"</strong> → one cluster, many core types, shared L3, per-core DVFS; vs two fixed clusters, separate L2s, CCI-400 inter-cluster coherence.</li>
+        <li><strong class="a">"Why is RSB important?"</strong> → returns are indirect but deterministic — a small RSB predicts them perfectly. Attackers have exploited RSB underflows for Spectre-RSB variants.</li>
+      </ul>
+    </div>
+    <div>
+      <ul>
+        <li><strong class="g">"What's the difference between PMU and SPE?"</strong> → PMU counts events in aggregate; SPE samples individual operations with per-op latency &amp; attribution.</li>
+        <li><strong class="g">"Why 1+3+4?"</strong> → thermal + benchmark + efficiency blend. 1 X for burst benchmarks, 3 mid for sustained, 4 little for background — fits a 5-7 W budget.</li>
+        <li><strong class="g">"Why does Arm keep making L3 bigger?"</strong> → DRAM bandwidth per core didn't grow at Moore rate. Larger L3 hides more misses. X925 + DSU-120 pushes toward laptop-sized LLCs.</li>
+        <li><strong class="g">"DSU vs CMN?"</strong> → DSU is a cluster-level shared L3 + snoop filter; CMN is a system-level mesh that connects multiple DSUs + I/O + memory controllers.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr"><span class="tag">16</span><h2>Closing: What the Next 5 Years Look Like</h2></div>
+  <div class="cols cols-2">
+    <div>
+      <ul>
+        <li><strong class="a">Bigger front-ends</strong> — 10-wide decode likely permanent; Apple-class 12-16-wide within reach.</li>
+        <li><strong class="a">SVE2 as default vectors</strong> — NEON in compat mode only.</li>
+        <li><strong class="a">SME on flagships</strong> — matrix units as standard for on-device LLM.</li>
+        <li><strong class="a">Memory tagging universal</strong> — MTE async in every Armv9-A shipping kernel.</li>
+        <li><strong class="a">Laptop-class Cortex-A</strong> — Windows-on-Arm + Android XR + Chromebook share the same X-core die budgets.</li>
+        <li><strong class="a">CCA on phones</strong> — protected media + on-device AI inference in Realm world.</li>
+      </ul>
+    </div>
+    <div>
+      <div class="card purple">
+        <h3 class="p">The bar for an Arm hire</h3>
+        <p>A serious Arm microarchitecture interview will probe: branch prediction, OoO recovery, memory ordering, cache coherence, PMU analysis, power/thermal modelling, and at least <em>awareness</em> of PAC/BTI/MTE/CCA. The six decks in this series are the map.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr"><span class="tag">17</span><h2>References</h2></div>
+  <div style="max-width:90%;margin:0 auto;font-size:0.58em;line-height:1.8;">
+    <p>
+      <strong class="a">Arm Ltd.</strong> — per-core Technical Reference Manuals (A76, A78, X1, X3, X4, A520, A725, X925) — publicly available<br>
+      <strong class="a">Arm Ltd.</strong> — <em>DynamIQ Shared Unit TRM</em> (DSU-110, DSU-120) — cache hierarchy, coherence, CHI egress<br>
+      <strong class="a">Arm Ltd.</strong> — <em>Arm PMU Architecture Reference Manual</em> (DDI 0601) — PMU + SPE + AMU<br>
+      <strong class="a">Shen &amp; Lipasti</strong> — <em>Modern Processor Design</em> (McGraw-Hill, 2013) — OoO pipeline fundamentals<br>
+      <strong class="a">Seznec, A.</strong> — &quot;A case for (partially) TAGged geometric history length branch prediction&quot; (ISCA 2006)<br>
+      <strong class="a">Chipsandcheese.com</strong> — microarchitecture deep-dives on Neoverse V2, Cortex-X4, Apple M-series<br>
+      <strong class="a">AnandTech</strong> — Andrei Frumusanu archive (2015-2023) — per-release benchmark + IPC analysis<br>
+      <strong class="a">Hot Chips / ISSCC proceedings</strong> — annual Cortex-X and Neoverse architecture talks<br>
+      <strong class="a">Linux kernel</strong> — <span class="mono">arch/arm64/</span> — canonical reader of every A-profile PMU / cache / memory feature
+    </p>
+    <p style="color:var(--muted);margin-top:0.8em;font-size:0.85em">
+      Presentation built with <a href="https://revealjs.com">Reveal.js 4.6</a> · Playfair Display + DM Sans + JetBrains Mono<br>
+      Educational use.
+    </p>
+  </div>
+</section>
+
+</div></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/reveal.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/plugin/highlight/highlight.min.js"></script>
+<script>
+Reveal.initialize({ hash: true, slideNumber: 'c/t', transition: 'fade', transitionSpeed: 'fast', controls: true, progress: true, center: false, width: 1100, height: 900, margin: 0.01, plugins: [RevealHighlight], highlight: { theme: 'monokai' } });
+</script>
+<script>
+(function(){ var h = Reveal.getConfig().height || 900; var m = Reveal.getConfig().margin || 0.02; var maxH = Math.floor(h * (1 - 2 * m)) + 'px'; function fixSlides(){ document.querySelectorAll('.reveal .slides>section,.reveal .slides>section>section').forEach(function(s){ s.style.display = 'block'; s.style.maxHeight = maxH; }); } Reveal.on('ready', fixSlides); Reveal.on('slidechanged', fixSlides); })();
+</script>
+</body>
+</html>

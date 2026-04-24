@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cortex-A Vector Extensions — NEON, SVE, SVE2, SME</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@400;500;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/reveal.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/theme/black.min.css">
+<style>
+  :root { --amber:#f5a623;--green:#4ecb8d;--purple:#a78bfa;--blue:#60a5fa;--red:#f87171; --bg:#0a0a0f;--bg2:#10101a;--bg3:#181824;--border:#2a2a3a;--text:#e8e8f0;--muted:#8888a8; }
+  .reveal-viewport { background: var(--bg); }
+  .reveal .slides section { background: transparent; }
+  .reveal section { text-align: left; }
+  .reveal .slides > section { padding: 0.5em; overflow-y: auto !important; align-items: flex-start !important; justify-content: flex-start !important; }
+  .reveal .progress { color: var(--amber); height: 3px; } .reveal .controls { color: var(--amber); }
+  .reveal section::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, var(--amber), var(--green)); }
+  .reveal { font-family: 'DM Sans', sans-serif; color: var(--text); font-size: 22px; }
+  .reveal .slide-number { font-family: 'JetBrains Mono', monospace; font-size: 0.7em; color: var(--muted); }
+  .reveal h1, .reveal h2, .reveal h3 { font-family: 'Playfair Display', serif; color: #fff; text-transform: none; letter-spacing: -0.01em; }
+  .reveal h1 { font-size: 2.4em; font-weight: 900; color: var(--amber); line-height: 1.1; }
+  .reveal h2 { font-size: 1.7em; font-weight: 700; color: var(--amber); margin-bottom: 0.6em; }
+  .reveal h3 { font-size: 1.2em; font-weight: 700; color: var(--green); margin-bottom: 0.3em; }
+  .reveal p  { font-size: 0.75em; line-height: 1.5; color: var(--text); }
+  .reveal li { font-size: 0.7em; line-height: 1.5; margin-bottom: 0.25em; }
+  .reveal code { font-family: 'JetBrains Mono', monospace; font-size: .72em; }
+  .reveal pre  { background: var(--bg3); border: 1px solid var(--border); border-radius: 8px; padding: 0.5em 1em; margin: 0.4em 0; width: 100%; box-shadow: none; }
+  .reveal pre code { font-size: 0.58em; line-height: 1.5; background: transparent; color: #cdd6f4; }
+  .slide-hdr { display: flex; align-items: center; gap: .4em; border-bottom: 1px solid var(--border); padding-bottom: .2em; margin-bottom: .3em; }
+  .slide-hdr .tag { font-family: 'JetBrains Mono', monospace; font-size: 0.55em; font-weight: 600; color: var(--bg); background: var(--amber); padding: .1em .4em; border-radius: 3px; letter-spacing: .04em; }
+  .slide-hdr h2 { margin: 0; font-size: 1.4em; }
+  .cols{display:grid;gap:1em;} .cols-2{grid-template-columns:1fr 1fr;} .cols-3{grid-template-columns:1fr 1fr 1fr;} .cols-6040{grid-template-columns:6fr 4fr;} .cols-4060{grid-template-columns:4fr 6fr;}
+  .card { background: var(--bg2); border: 1px solid var(--border); border-radius: 8px; padding: 1em 1.2em; box-shadow: 0 4px 20px rgba(0,0,0,0.3); margin: 0.4em 0; }
+  .card.amber { border-left: 3px solid var(--amber); } .card.green { border-left: 3px solid var(--green); } .card.purple{ border-left: 3px solid var(--purple); } .card.blue  { border-left: 3px solid var(--blue); } .card.red   { border-left: 3px solid var(--red); }
+  .card h3 { font-size: 1em; margin: 0 0 0.4em; }
+  .card p, .card ul { font-size: 0.8em; margin: 0; color: #b8b8d0; } .card ul { padding-left: 1.2em; } .card li { font-size: 0.85em; margin-bottom: 0.25em; }
+  .reveal table { width: 100%; border-collapse: collapse; font-size: 0.65em; margin: 0.5em 0; }
+  .reveal table th { background: var(--bg3); color: var(--amber); padding: 0.5em 0.7em; border: 1px solid var(--border); text-align: left; font-weight: 700; }
+  .reveal table td { padding: 0.5em 0.7em; border: 1px solid var(--border); color: #ccc; vertical-align: top; }
+  .reveal table tr:nth-child(even) td { background: #0e0e18; }
+  .a{color:var(--amber);font-weight:600;} .g{color:var(--green);font-weight:600;} .p{color:var(--purple);font-weight:600;} .b{color:var(--blue);font-weight:600;} .r{color:var(--red);font-weight:600;} .mono{font-family:'JetBrains Mono',monospace;}
+  svg.diagram { display: block; margin: 0 auto; overflow: visible; }
+  .title-slide h1 { font-size: 2.4em; } .title-slide .subtitle { font-size: 0.85em; color: var(--green); font-weight: 400; letter-spacing: 0.06em; margin: 0.3em 0 0.6em; } .title-slide .meta { font-size: 0.6em; color: var(--muted); font-family: 'JetBrains Mono', monospace; }
+  .dim { color: var(--muted); } .small { font-size: 0.65em; } .smaller { font-size: 0.55em; } .tiny { font-size: 0.48em; }
+  .reveal ul, .reveal ol { margin: .15em 0 .15em 1em; }
+</style>
+</head>
+<body>
+<div class="reveal">
+<div class="slides">
+
+<section class="title-slide" data-background-color="#0a0a0f">
+  <div style="font-family:'JetBrains Mono',monospace;font-size:.5em;color:var(--muted);margin-bottom:.4em;letter-spacing:.1em;">ARM CORTEX-A · PRESENTATION 04</div>
+  <h1>Vector Extensions — NEON, SVE, SVE2, SME</h1>
+  <div class="subtitle">Thirty years of Arm SIMD · Fixed-width → Scalable → Matrix</div>
+  <div style="width:60px;height:3px;background:var(--amber);margin-bottom:1.4em;"></div>
+  <div class="meta">NEON · SVE · SVE2 · SME · Bfloat16 · INT8 dot-product · Crypto · Fujitsu A64FX</div>
+</section>
+
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr"><span class="tag">02</span><h2>Evolution of Arm SIMD</h2></div>
+  <table>
+    <tr><th>Year</th><th>Extension</th><th>Width</th><th>Shipping in</th><th>Key idea</th></tr>
+    <tr><td>2005</td><td><span class="a">NEON (v1)</span></td><td>128-bit fixed</td><td>Cortex-A8</td><td>First Arm SIMD; integer + SP float</td></tr>
+    <tr><td>2011</td><td><span class="a">NEON + full DP</span></td><td>128-bit fixed</td><td>Armv8-A (A53/A57)</td><td>Unified with FPU; 32 × 128-bit V-regs</td></tr>
+    <tr><td>2016</td><td><span class="a">FP16 + dot-product (SDOT/UDOT)</span></td><td>128-bit fixed</td><td>Armv8.2-A, A75+</td><td>INT8 × INT8 → INT32 accumulate; ML</td></tr>
+    <tr><td>2017</td><td><span class="a">SVE (optional)</span></td><td>128 – 2048 bit</td><td>Fujitsu A64FX only</td><td>Vector-Length Agnostic; HPC</td></tr>
+    <tr><td>2020</td><td><span class="a">bfloat16 / matmul-INT8</span></td><td>128-bit fixed</td><td>Armv8.6-A</td><td>ML training dtypes in NEON</td></tr>
+    <tr><td>2021</td><td><span class="a">SVE2 (mandatory)</span></td><td>128 – 2048 bit</td><td>Armv9-A (X2, A710, A510)</td><td>SVE for mobile; replaces NEON for new code</td></tr>
+    <tr><td>2023</td><td><span class="a">SME / SME2</span></td><td>SVL × SVL tiles</td><td>Armv9.2-A</td><td>Matrix outer-product; streaming mode</td></tr>
+  </table>
+</section>
+
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr"><span class="tag">03</span><h2>NEON — Advanced SIMD</h2></div>
+  <div class="cols cols-2">
+    <div>
+      <ul>
+        <li><strong>32 × 128-bit V-registers</strong> in AArch64 (V0–V31). In AArch32 they overlay as 32 × D-regs or 16 × Q-regs.</li>
+        <li>Each V-reg can be addressed as:
+          <ul>
+            <li>16 × B (byte), 8 × H (halfword), 4 × S (word), 2 × D (doubleword)</li>
+            <li>4 × FP32, 8 × FP16 (if FP16 feature), 2 × FP64</li>
+          </ul>
+        </li>
+        <li>Lane-wise arithmetic: <span class="mono">ADD V0.4S, V1.4S, V2.4S</span>.</li>
+        <li><strong>Saturating arithmetic</strong>, <strong>pairwise</strong> ops (ADDP, UADALP), <strong>cross-lane</strong> shuffles (EXT, UZP, ZIP, TRN, TBL).</li>
+        <li>Widening / narrowing pairs: <span class="mono">UADDL</span> (add, widen), <span class="mono">ADDHN</span> (add high narrow).</li>
+        <li>Crypto extension piggybacks on V-regs: <span class="mono">AESE/AESD/AESMC, SHA1H, SHA256H, PMULL</span> (GF(2^64)).</li>
+      </ul>
+    </div>
+    <div>
+      <pre><code class="nohighlight">// memcpy tail using NEON 128-bit loads
+// (glibc-style AArch64 memcpy)
+
+ldp   q0, q1, [x1, #-32]    // last 32 bytes
+ldr   q2, [x1, #-48]        // prior 16
+stp   q0, q1, [x0, #-32]
+str   q2, [x0, #-48]
+
+// SDOT (INT8 × INT8 → INT32 accumulate)
+sdot  v3.4s, v4.16b, v5.16b
+// per-lane: v3[i] += sum(v4[4i..4i+3] * v5[4i..4i+3])
+
+// 4x4 matmul kernel (FP32)
+fmla  v0.4s, v4.4s, v8.s[0]
+fmla  v0.4s, v5.4s, v8.s[1]
+fmla  v0.4s, v6.4s, v8.s[2]
+fmla  v0.4s, v7.4s, v8.s[3]
+</code></pre>
+    </div>
+  </div>
+</section>
+
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr"><span class="tag">04</span><h2>Why NEON Needed a Successor</h2></div>
+  <div class="cols cols-2">
+    <div>
+      <ul>
+        <li><strong class="r">Fixed 128-bit width</strong>. Compiler has to pick: vectorise for 128-bit or widen the ABI and break compat. HPC wants 512-bit; mobile wants 128-bit; both want the same binary.</li>
+        <li><strong class="r">Tail handling is painful</strong>. Loop epilogues for non-multiple-of-4 counts dominate code size and branch footprint.</li>
+        <li><strong class="r">No predication</strong>. Conditional execution per-lane requires mask + blend sequences; expensive.</li>
+        <li><strong class="r">Limited gather/scatter</strong>. NEON can do TBL-based shuffles, but no native indexed load/store like SSE / AVX-512.</li>
+        <li>These gaps made Arm uncompetitive in HPC and ML training, which is why <strong>SVE</strong> was designed in close collaboration with Fujitsu for the K successor (Fugaku).</li>
+      </ul>
+    </div>
+    <div>
+      <div class="card amber">
+        <h3>The width-agnostic trick</h3>
+        <p>SVE code compiles <strong>once</strong> for <em>all</em> widths 128–2048 in 128-bit increments. The runtime vector length is queried via <span class="mono">RDVL</span>; loops use <span class="mono">WHILELT</span> predicates that auto-mask the last iteration.</p>
+      </div>
+      <div class="card purple" style="margin-top:0.4em;">
+        <h3 class="p">Fujitsu A64FX</h3>
+        <p>512-bit SVE, 48 cores per PE, HBM2, 2.7 PF/s. Powered Fugaku, #1 Top500 in 2020-21. Proved Arm could do sustained HPC.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr"><span class="tag">05</span><h2>SVE — Scalable Vector Extension</h2></div>
+  <div class="cols cols-2">
+    <div>
+      <ul>
+        <li><strong>32 × Z-registers</strong> of implementation-defined length (128 – 2048 bit in 128-bit steps). Low 128 bits of each overlays its NEON V-reg.</li>
+        <li><strong>16 × P-registers</strong> (predicate), 1 bit per byte of vector — so up to 256 predicate bits.</li>
+        <li><strong>VLA (Vector-Length-Agnostic)</strong> programming: loops written with <span class="mono">WHILELT</span> and <span class="mono">INCP</span>, no explicit loop count.</li>
+        <li><strong>First-fault loads</strong> — a vector load that doesn't fault on later elements even if they would; enables <span class="mono">strlen</span>-style ops.</li>
+        <li><strong>Gather / scatter</strong>: indexed load/store in one instruction.</li>
+        <li>Implementations: A64FX (512-bit), Graviton 3 (256-bit), NVIDIA Grace (128-bit per core), Microsoft Cobalt (128-bit). Phone SoCs so far: 128-bit in SVE2.</li>
+      </ul>
+    </div>
+    <div>
+      <pre><code class="nohighlight">// Canonical SVE loop — daxpy y[i] += a*x[i]
+
+  mov     x3, #0                // i = 0
+  whilelt p0.d, x3, x4          // p0 = (i &lt; n) mask
+  b.none  2f
+
+1:
+  ld1d    z0.d, p0/z, [x0, x3, lsl #3]   // x[i..]
+  ld1d    z1.d, p0/z, [x1, x3, lsl #3]   // y[i..]
+  fmla    z1.d, p0/m, z0.d, z2.d         // y += a*x (masked)
+  st1d    z1.d, p0,   [x1, x3, lsl #3]   // y[i..]
+  incd    x3                              // i += VL/8
+  whilelt p0.d, x3, x4
+  b.first 1b                               // loop if any active
+2:
+  ret
+</code></pre>
+    </div>
+  </div>
+</section>
+
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr"><span class="tag">06</span><h2>Predication — Per-lane Masking</h2></div>
+  <div class="cols cols-2">
+    <div>
+      <ul>
+        <li>SVE operations take an optional <strong>governing predicate</strong>: <span class="mono">p0/z</span> (zeroing inactive) or <span class="mono">p0/m</span> (merging — leave dst unchanged).</li>
+        <li><strong>Compare ops</strong> write a predicate: <span class="mono">CMPGT P1.S, P0/Z, Z0.S, Z1.S</span>.</li>
+        <li><strong>WHILELT/WHILELE/WHILELO/WHILELS</strong> create loop-termination predicates (signed/unsigned, inclusive/exclusive). Key to VLA loops.</li>
+        <li><strong>PTRUE / PFALSE</strong> set an all-true / all-false predicate.</li>
+        <li><strong>Logical predicate ops</strong> (AND/ORR/EOR/BIC between predicates) let you combine masks.</li>
+        <li><strong>INCP / DECP</strong> — increment X-register by active lane count. Replaces loop-counter math.</li>
+      </ul>
+    </div>
+    <div>
+      <div class="card amber">
+        <h3>No separate "scalar tail"</h3>
+        <p>In NEON, a loop processes 4 × FP32 per iteration and you need a post-loop to handle the 1-3 leftover elements. In SVE, the same loop's last iteration has fewer active lanes — no tail code at all.</p>
+      </div>
+      <div class="card blue" style="margin-top:0.4em;">
+        <h3 class="b">First-fault loads</h3>
+        <p><span class="mono">LDFF1D</span> — load that delivers as many elements as were legal; sets <span class="mono">FFR</span> (First Fault Register) to the mask of successful lanes. Enables a vectorised <span class="mono">strlen</span> that never reads past the zero byte.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr"><span class="tag">07</span><h2>SVE2 — SVE for Everyone (Armv9-A)</h2></div>
+  <div class="cols cols-2">
+    <div>
+      <ul>
+        <li>Armv9-A mandates SVE2. First implementations: <strong>Cortex-X2, A710, A510</strong> (all 128-bit).</li>
+        <li>Adds hundreds of instructions borrowed from NEON that were missing in SVE1:
+          <ul>
+            <li>Complex FP (CADD, CMLA)</li>
+            <li>Saturating integer, rounding shifts</li>
+            <li>Bitwise permutes &amp; interleaves</li>
+            <li>String-match ops (MATCH, NMATCH) — serves memcmp, strlen, strchr directly</li>
+            <li>Cryptography: SHA3, SM3/SM4, PMULL128</li>
+          </ul>
+        </li>
+        <li>Bf16 + INT8 matmul instructions (BFMMLA, SMMLA, UMMLA) — the ML / LLM-inference workhorse.</li>
+        <li>First-party <strong>mandates SVE2 for new Armv9-A code</strong>. Expect NEON to stick around for 10+ years but new-kernel/toolchain energy goes into SVE2.</li>
+      </ul>
+    </div>
+    <div>
+      <pre><code class="nohighlight">// SVE2 string match — compare 16 input bytes
+// against 16 candidate bytes, lane-wise ANY-match
+
+    ptrue   p0.b                     // all lanes active
+    ld1b    z0.b, p0/z, [x0]         // input
+    ld1b    z1.b, p0/z, [x1]         // candidates
+    match   p1.b, p0/z, z0.b, z1.b   // p1 = any match
+
+// BF16 matmul — 4x4 block of FP32 accumulator,
+// packed BF16 A and B
+
+    bfmmla  z0.s, z4.h, z8.h
+// accumulates 2x2 outer-product of 4-element dot products
+</code></pre>
+    </div>
+  </div>
+</section>
+
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr"><span class="tag">08</span><h2>SME — Scalable Matrix Extension (Armv9.2-A)</h2></div>
+  <div class="cols cols-2">
+    <div>
+      <ul>
+        <li>Adds a 2-D tile storage: <strong>ZA</strong>, <strong>SVL</strong> × <strong>SVL</strong> bytes (<span class="mono">SVL</span> = streaming vector length, implementation-defined, power-of-two from 128 to 2048 bits).</li>
+        <li>Four "slices" of ZA can be accessed as 1-D SVE vectors: <span class="mono">ZA0H / ZA0V</span> etc.</li>
+        <li>Core instruction: <strong>outer product</strong> into ZA tile. Example: <span class="mono">FMOPA</span> FP32 outer product into a ZA.S tile.</li>
+        <li>Runs in a new "streaming SVE" mode — SVE ops operate at <span class="mono">SVL</span> (can be larger than SVE's normal VL).</li>
+        <li>Target: GEMM workloads, LLM matmul, DSP convolutions — the same territory Apple AMX has been in since 2019.</li>
+        <li>SME2 (v9.3) expands with multi-vector loads and FP32-to-BF16 converts — plus RME hooks for confidential ML.</li>
+      </ul>
+    </div>
+    <div>
+      <div class="card green">
+        <h3 class="g">Streaming mode</h3>
+        <p>Regular (non-streaming) SVE uses the CPU's FP/SIMD unit. Streaming SVE borrows a dedicated hardware tile + outer-product engine. Switching modes is software-controlled via <span class="mono">PSTATE.SM</span> and <span class="mono">SMSTART / SMSTOP</span>.</p>
+      </div>
+      <div class="card purple" style="margin-top:0.4em;">
+        <h3 class="p">Why matrices</h3>
+        <p>Modern ML is dominated by matmul. A tile of 128×128 FP16 = 32 KB; a streaming outer-product issues that much MAC per instruction. Dramatically higher throughput than SVE vector ops.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr"><span class="tag">09</span><h2>NEON vs SVE vs SME — Pick the Tool</h2></div>
+  <table>
+    <tr><th>Aspect</th><th>NEON</th><th>SVE / SVE2</th><th>SME</th></tr>
+    <tr><td>Width</td><td>128-bit fixed</td><td>128-2048 bit, scalable</td><td>SVL × SVL tile</td></tr>
+    <tr><td>Predication</td><td>No (mask+blend)</td><td>Yes (16 P-regs)</td><td>Yes + 2-D</td></tr>
+    <tr><td>Tail handling</td><td>Scalar epilogue</td><td>WHILELT auto-mask</td><td>Tile slice masks</td></tr>
+    <tr><td>Gather/scatter</td><td>TBL only</td><td>Native</td><td>Multi-vector load</td></tr>
+    <tr><td>Best for</td><td>Media, codecs, crypto</td><td>HPC, BLAS, ML inference</td><td>GEMM / LLM</td></tr>
+    <tr><td>First shipped</td><td>Cortex-A8 (2009)</td><td>A64FX (2020), Cortex X2 (2022)</td><td>TBD (2025 flagships)</td></tr>
+    <tr><td>Mandatory?</td><td>v8.0-A</td><td>v9-A (SVE2)</td><td>v9.2-A optional</td></tr>
+  </table>
+  <p class="small">In practice: code targeting mobile + server should prefer SVE2 going forward. NEON intrinsics remain for legacy + codec libraries. SME is for GEMM-heavy kernels (LLM inference, <span class="mono">cblas_sgemm</span>).</p>
+</section>
+
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr"><span class="tag">10</span><h2>Integer SIMD Dot-Product — the ML Fast-Path</h2></div>
+  <div class="cols cols-2">
+    <div>
+      <ul>
+        <li><strong class="a">UDOT / SDOT</strong> (Armv8.2-A) — 4× INT8 × INT8 → INT32 accumulate, per lane. 128-bit NEON = 16 byte inputs × 2 = 8 INT32 accumulators per instruction = <strong>32 MACs/cycle</strong> at 1.0 CPI.</li>
+        <li><strong class="a">SMMLA / UMMLA / USMMLA</strong> (Armv8.6-A) — 2×8 × 8×2 matrix multiply into 2×2 INT32, in one instruction = <strong>64 MACs/cycle</strong>.</li>
+        <li>Variants with bf16 (<span class="mono">BFDOT/BFMMLA</span>) target training-accuracy ML.</li>
+        <li>This is why XNNPACK / Arm Compute Library / LLaMA.cpp's AArch64 path gets 2-3× over plain FP32.</li>
+        <li>The same instructions exist in SVE2 — scaled to the chosen vector length.</li>
+      </ul>
+    </div>
+    <div>
+      <pre><code class="nohighlight">// INT8 GEMM micro-kernel (NEON)
+// A: 4 x K, B: K x 16, C: 4 x 16 INT32
+
+.loop:
+  ld1  {v0.16b-v3.16b}, [x1], #64      // 4 rows of A
+  ld1  {v4.16b-v7.16b}, [x2], #64      // 4 cols of B
+
+  sdot v16.4s, v4.16b, v0.4b[0]        // C[0,:]
+  sdot v17.4s, v4.16b, v0.4b[1]
+  sdot v18.4s, v4.16b, v0.4b[2]
+  sdot v19.4s, v4.16b, v0.4b[3]
+  ...                                  // 16 sdots total
+  subs w3, w3, #4
+  bne  .loop
+
+// 16 sdots × 32 MACs each = 512 MACs / iter
+</code></pre>
+    </div>
+  </div>
+</section>
+
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr"><span class="tag">11</span><h2>Crypto Extensions</h2></div>
+  <table>
+    <tr><th>Instruction(s)</th><th>Feature</th><th>Purpose</th></tr>
+    <tr><td><span class="mono">AESE / AESD / AESMC / AESIMC</span></td><td><span class="a">AES</span> (FEAT_AES)</td><td>One-round AES encrypt / decrypt / mix-columns</td></tr>
+    <tr><td><span class="mono">PMULL / PMULL2</span></td><td><span class="a">PMULL</span> (FEAT_PMULL)</td><td>Carry-less multiply — GF(2^64), GCM, CRC-32</td></tr>
+    <tr><td><span class="mono">SHA1C / SHA1P / SHA1M / SHA1H</span></td><td><span class="a">SHA1</span></td><td>SHA-1 hash rounds (legacy)</td></tr>
+    <tr><td><span class="mono">SHA256H / SHA256H2 / SHA256SU0/1</span></td><td><span class="a">SHA256</span></td><td>SHA-256 rounds; mandatory in Armv8.2</td></tr>
+    <tr><td><span class="mono">SHA512H / SHA512H2 / SHA512SU0/1</span></td><td><span class="a">SHA3</span> (SVE2)</td><td>SHA-512 rounds</td></tr>
+    <tr><td><span class="mono">SM3*</span>, <span class="mono">SM4*</span></td><td><span class="a">SM4/SM3</span></td><td>Chinese national cipher + hash</td></tr>
+    <tr><td><span class="mono">EOR3 / RAX1 / XAR / BCAX</span></td><td><span class="a">SHA3</span></td><td>Keccak / SHA-3 primitives</td></tr>
+  </table>
+  <p class="small">TLS / AES-GCM / file-system encryption all run at &gt;10 GB/s on modern Cortex-A flagships because of these. A block cipher that would cost &gt;20 cycles/byte in scalar code costs &lt;0.5 cycles/byte with AES+PMULL.</p>
+</section>
+
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr"><span class="tag">12</span><h2>Compiler Auto-vectorization Reality</h2></div>
+  <div class="cols cols-2">
+    <div>
+      <ul>
+        <li><strong class="g">NEON auto-vec</strong> — LLVM and GCC have strong auto-vec for simple loops. Gets ~60-80% of hand-tuned for straight-line arithmetic.</li>
+        <li><strong class="g">SVE auto-vec</strong> — GCC 10+ and LLVM 13+ produce decent SVE for HPC loops. VLA loops compile well.</li>
+        <li><strong class="r">Fails at</strong>: data-dependent branches, gather-heavy patterns, non-contiguous strides, histogram-like reductions.</li>
+        <li>For those you drop to:
+          <ul>
+            <li><strong>NEON intrinsics</strong> (<span class="mono">#include &lt;arm_neon.h&gt;</span>) — type-safe wrappers, same IR as inline asm.</li>
+            <li><strong>SVE ACLE</strong> intrinsics (<span class="mono">&lt;arm_sve.h&gt;</span>) — <span class="mono">svint32_t</span>, <span class="mono">svbool_t</span>, compile to VLA code.</li>
+            <li><strong>Inline assembly</strong> — last resort.</li>
+          </ul>
+        </li>
+      </ul>
+    </div>
+    <div>
+      <pre><code class="nohighlight">// SVE2 ACLE intrinsic — daxpy (VLA)
+#include &lt;arm_sve.h&gt;
+
+void daxpy(double *y, const double *x,
+           double a, size_t n) {
+  svfloat64_t va = svdup_f64(a);
+  size_t i = 0;
+  svbool_t pg = svwhilelt_b64(i, n);
+  while (svptest_first(svptrue_b64(), pg)) {
+    svfloat64_t vx = svld1_f64(pg, x + i);
+    svfloat64_t vy = svld1_f64(pg, y + i);
+    vy = svmad_f64_m(pg, vx, va, vy);
+    svst1_f64(pg, y + i, vy);
+    i += svcntd();
+    pg = svwhilelt_b64(i, n);
+  }
+}
+</code></pre>
+    </div>
+  </div>
+</section>
+
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr"><span class="tag">13</span><h2>OS &amp; ABI Considerations</h2></div>
+  <div class="cols cols-2">
+    <div>
+      <ul>
+        <li><strong class="a">Context-switch cost</strong>: saving/restoring V0-V31 = 512 B. SVE at 2048-bit = 8 KB. SME ZA tile at SVL=256B = 64 KB.</li>
+        <li>Linux uses <strong>lazy FP context</strong> — first use in a new task triggers a trap; restoration on demand.</li>
+        <li>SME adds a whole new <strong>streaming-SVE mode</strong> with its own state bit (<span class="mono">PSTATE.SM</span>). OS must save/restore on both mode and process boundaries.</li>
+        <li>Syscalls on AArch64 should set <span class="mono">PSTATE.SM=0</span> before returning — some kernel services clobber Z-regs.</li>
+        <li>Android / Linux discovery via <span class="mono">HWCAP</span> and <span class="mono">HWCAP2</span> bits in <span class="mono">/proc/self/auxv</span> — <span class="mono">HWCAP_ASIMD</span>, <span class="mono">HWCAP_SVE</span>, <span class="mono">HWCAP2_SVE2</span>, <span class="mono">HWCAP2_SME</span>.</li>
+      </ul>
+    </div>
+    <div>
+      <div class="card amber">
+        <h3>Apple AMX vs SME</h3>
+        <p>Apple has shipped AMX (undocumented co-processor) since M1 / A14. SME is the Arm-architectural equivalent — but Apple has not (yet) implemented SME. Apple's M4 still ships AMX. Expected convergence as Apple adopts SME in a future chip.</p>
+      </div>
+      <div class="card red" style="margin-top:0.4em;">
+        <h3 class="r">Don't forget tagging</h3>
+        <p>SME state interacts with <strong>MTE</strong>: SME store instructions must respect tag checks. SVE gather/scatter similarly — each lane's PA is tag-checked independently.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr"><span class="tag">14</span><h2>Lessons for the Interview</h2></div>
+  <div class="cols cols-2">
+    <div>
+      <ul>
+        <li><strong class="a">"Why SVE over NEON?"</strong> → vector-length agnostic; one binary vectorises efficiently across phones (128-bit) and servers (256/512/2048-bit). Predication eliminates tail code.</li>
+        <li><strong class="a">"What's SDOT doing?"</strong> → 4× INT8 × INT8 → INT32 accumulate per lane; the ML / quantised-inference fast path.</li>
+        <li><strong class="a">"What's in SVE2 that SVE1 doesn't have?"</strong> → NEON-equivalent integer/saturating/match ops + bf16/INT8 matmul. SVE1 was HPC-only; SVE2 brings it to mobile.</li>
+      </ul>
+    </div>
+    <div>
+      <ul>
+        <li><strong class="g">"Why does SME exist if SVE can do matmul?"</strong> → SVE needs <em>N</em> instructions for an outer product; SME does it in one, with a dedicated tile register file. ~4-8× higher throughput on GEMM.</li>
+        <li><strong class="g">"Fixed vs scalable vector width?"</strong> → fixed requires fresh binaries per target; scalable lets one binary run on everything from A510 (128-bit) to Neoverse V2 (256-bit) to Fugaku (512-bit).</li>
+        <li><strong class="g">"What's the first-fault register?"</strong> → FFR in SVE — tracks which lanes of a LDFF1* load succeeded; enables safe vectorised <span class="mono">strlen</span>.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr"><span class="tag">15</span><h2>Further Reading</h2></div>
+  <div class="cols cols-2">
+    <div>
+      <h3>Arm documents</h3>
+      <ul>
+        <li><strong>DDI 0487</strong> — Arm ARM for A-profile — chapters C2/C3 (NEON), C4 (SVE/SVE2), C5 (SME)</li>
+        <li><strong>Arm Compiler 6 Reference Guide</strong> — NEON + SVE ACLE intrinsics</li>
+        <li><strong>ARM IHI 0073</strong> — Procedure Call Standard for AArch64 — scalable-vector ABI section</li>
+        <li><strong>Arm Learn the Architecture: Introducing SME</strong> — free blog + PDF series</li>
+      </ul>
+    </div>
+    <div>
+      <h3>Practical</h3>
+      <ul>
+        <li><strong>Arm Compute Library</strong> (ComputeLibrary/arm_compute) — production CNN / GEMM kernels in NEON/SVE/SME</li>
+        <li><strong>XNNPACK</strong> — Google's mobile-ML kernels; SDOT/UDOT paths on Cortex-A</li>
+        <li><strong>llama.cpp</strong> — <span class="mono">ggml-cpu/arch/arm/</span> has NEON, SVE and SME kernels for LLM inference</li>
+        <li><strong>OpenSSL / BoringSSL</strong> — AES-NI-style Arm crypto paths</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr"><span class="tag">16</span><h2>References</h2></div>
+  <div style="max-width:90%;margin:0 auto;font-size:0.58em;line-height:1.8;">
+    <p>
+      <strong class="a">Arm Ltd.</strong> — <em>DDI 0487</em> — canonical spec for NEON, SVE, SVE2, SME<br>
+      <strong class="a">Arm Ltd.</strong> — <em>Arm C Language Extensions (ACLE)</em> — intrinsic reference<br>
+      <strong class="a">Arm Ltd.</strong> — <em>SVE Programming Guide</em> (Arm 100891), freely downloadable<br>
+      <strong class="a">Stephens, Biles, Boettcher et al.</strong> — &quot;The Arm Scalable Vector Extension&quot; (IEEE Micro, 2017)<br>
+      <strong class="a">Fujitsu Ltd.</strong> — <em>A64FX Microarchitecture Manual</em> — first SVE implementation reference<br>
+      <strong class="a">AnandTech</strong> — Andrei Frumusanu reviews of X2/A710 SVE2 throughput (2022)<br>
+      <strong class="a">Dougall Johnson</strong> — dougallj.wordpress.com — Apple AMX reverse-engineering pieces (for SME context)<br>
+      <strong class="a">Chipsandcheese</strong> — deep-dives on Cortex-X and Neoverse V-series FP/SIMD back-ends
+    </p>
+    <p style="color:var(--muted);margin-top:0.8em;font-size:0.85em">
+      Presentation built with <a href="https://revealjs.com">Reveal.js 4.6</a> · Playfair Display + DM Sans + JetBrains Mono<br>
+      Educational use.
+    </p>
+  </div>
+</section>
+
+</div></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/reveal.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/plugin/highlight/highlight.min.js"></script>
+<script>
+Reveal.initialize({ hash: true, slideNumber: 'c/t', transition: 'fade', transitionSpeed: 'fast', controls: true, progress: true, center: false, width: 1100, height: 900, margin: 0.01, plugins: [RevealHighlight], highlight: { theme: 'monokai' } });
+</script>
+<script>
+(function(){ var h = Reveal.getConfig().height || 900; var m = Reveal.getConfig().margin || 0.02; var maxH = Math.floor(h * (1 - 2 * m)) + 'px'; function fixSlides(){ document.querySelectorAll('.reveal .slides>section,.reveal .slides>section>section').forEach(function(s){ s.style.display = 'block'; s.style.maxHeight = maxH; }); } Reveal.on('ready', fixSlides); Reveal.on('slidechanged', fixSlides); })();
+</script>
+</body>
+</html>

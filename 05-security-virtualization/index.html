@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cortex-A Security &amp; Virtualization</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@400;500;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/reveal.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/theme/black.min.css">
+<style>
+  :root { --amber:#f5a623;--green:#4ecb8d;--purple:#a78bfa;--blue:#60a5fa;--red:#f87171; --bg:#0a0a0f;--bg2:#10101a;--bg3:#181824;--border:#2a2a3a;--text:#e8e8f0;--muted:#8888a8; }
+  .reveal-viewport { background: var(--bg); }
+  .reveal .slides section { background: transparent; }
+  .reveal section { text-align: left; }
+  .reveal .slides > section { padding: 0.5em; overflow-y: auto !important; align-items: flex-start !important; justify-content: flex-start !important; }
+  .reveal .progress { color: var(--amber); height: 3px; } .reveal .controls { color: var(--amber); }
+  .reveal section::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, var(--amber), var(--green)); }
+  .reveal { font-family: 'DM Sans', sans-serif; color: var(--text); font-size: 22px; }
+  .reveal .slide-number { font-family: 'JetBrains Mono', monospace; font-size: 0.7em; color: var(--muted); }
+  .reveal h1, .reveal h2, .reveal h3 { font-family: 'Playfair Display', serif; color: #fff; text-transform: none; letter-spacing: -0.01em; }
+  .reveal h1 { font-size: 2.4em; font-weight: 900; color: var(--amber); line-height: 1.1; }
+  .reveal h2 { font-size: 1.7em; font-weight: 700; color: var(--amber); margin-bottom: 0.6em; }
+  .reveal h3 { font-size: 1.2em; font-weight: 700; color: var(--green); margin-bottom: 0.3em; }
+  .reveal p  { font-size: 0.75em; line-height: 1.5; color: var(--text); }
+  .reveal li { font-size: 0.7em; line-height: 1.5; margin-bottom: 0.25em; }
+  .reveal code { font-family: 'JetBrains Mono', monospace; font-size: .72em; }
+  .reveal pre  { background: var(--bg3); border: 1px solid var(--border); border-radius: 8px; padding: 0.5em 1em; margin: 0.4em 0; width: 100%; box-shadow: none; }
+  .reveal pre code { font-size: 0.58em; line-height: 1.5; background: transparent; color: #cdd6f4; }
+  .slide-hdr { display: flex; align-items: center; gap: .4em; border-bottom: 1px solid var(--border); padding-bottom: .2em; margin-bottom: .3em; }
+  .slide-hdr .tag { font-family: 'JetBrains Mono', monospace; font-size: 0.55em; font-weight: 600; color: var(--bg); background: var(--amber); padding: .1em .4em; border-radius: 3px; letter-spacing: .04em; }
+  .slide-hdr h2 { margin: 0; font-size: 1.4em; }
+  .cols{display:grid;gap:1em;} .cols-2{grid-template-columns:1fr 1fr;} .cols-3{grid-template-columns:1fr 1fr 1fr;} .cols-6040{grid-template-columns:6fr 4fr;} .cols-4060{grid-template-columns:4fr 6fr;}
+  .card { background: var(--bg2); border: 1px solid var(--border); border-radius: 8px; padding: 1em 1.2em; box-shadow: 0 4px 20px rgba(0,0,0,0.3); margin: 0.4em 0; }
+  .card.amber { border-left: 3px solid var(--amber); } .card.green { border-left: 3px solid var(--green); } .card.purple{ border-left: 3px solid var(--purple); } .card.blue  { border-left: 3px solid var(--blue); } .card.red   { border-left: 3px solid var(--red); }
+  .card h3 { font-size: 1em; margin: 0 0 0.4em; }
+  .card p, .card ul { font-size: 0.8em; margin: 0; color: #b8b8d0; } .card ul { padding-left: 1.2em; } .card li { font-size: 0.85em; margin-bottom: 0.25em; }
+  .reveal table { width: 100%; border-collapse: collapse; font-size: 0.65em; margin: 0.5em 0; }
+  .reveal table th { background: var(--bg3); color: var(--amber); padding: 0.5em 0.7em; border: 1px solid var(--border); text-align: left; font-weight: 700; }
+  .reveal table td { padding: 0.5em 0.7em; border: 1px solid var(--border); color: #ccc; vertical-align: top; }
+  .reveal table tr:nth-child(even) td { background: #0e0e18; }
+  .a{color:var(--amber);font-weight:600;} .g{color:var(--green);font-weight:600;} .p{color:var(--purple);font-weight:600;} .b{color:var(--blue);font-weight:600;} .r{color:var(--red);font-weight:600;} .mono{font-family:'JetBrains Mono',monospace;}
+  svg.diagram { display: block; margin: 0 auto; overflow: visible; }
+  .title-slide h1 { font-size: 2.4em; } .title-slide .subtitle { font-size: 0.85em; color: var(--green); font-weight: 400; letter-spacing: 0.06em; margin: 0.3em 0 0.6em; } .title-slide .meta { font-size: 0.6em; color: var(--muted); font-family: 'JetBrains Mono', monospace; }
+  .dim { color: var(--muted); } .small { font-size: 0.65em; } .smaller { font-size: 0.55em; } .tiny { font-size: 0.48em; }
+  .reveal ul, .reveal ol { margin: .15em 0 .15em 1em; }
+</style>
+</head>
+<body>
+<div class="reveal">
+<div class="slides">
+
+<section class="title-slide" data-background-color="#0a0a0f">
+  <div style="font-family:'JetBrains Mono',monospace;font-size:.5em;color:var(--muted);margin-bottom:.4em;letter-spacing:.1em;">ARM CORTEX-A · PRESENTATION 05</div>
+  <h1>Security &amp; Virtualization</h1>
+  <div class="subtitle">TrustZone-A · EL2 hypervisor · VHE · PAC · BTI · MTE · RME / CCA</div>
+  <div style="width:60px;height:3px;background:var(--amber);margin-bottom:1.4em;"></div>
+  <div class="meta">Secure worlds · Stage-2 translation · QARMA · Top-Byte-Ignore · Realms · Granule Protection Table</div>
+</section>
+
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr"><span class="tag">02</span><h2>The Two Halves of this Deck</h2></div>
+  <div class="cols cols-2">
+    <div>
+      <h3 class="a">Isolation primitives</h3>
+      <ul>
+        <li><strong>TrustZone-A</strong> — Secure vs Non-secure worlds since Armv6 (2004); the original isolation model.</li>
+        <li><strong>EL2 hypervisor</strong> — Armv7-A (2010) Hyp mode, then Armv8-A EL2, then VHE (v8.1).</li>
+        <li><strong>RME / CCA</strong> — Armv9-A (2021) adds Realm &amp; Root worlds; four-world model.</li>
+      </ul>
+    </div>
+    <div>
+      <h3 class="g">Per-access defences</h3>
+      <ul>
+        <li><strong>PAC</strong> (Armv8.3) — Pointer Authentication; signs function pointers with a MAC.</li>
+        <li><strong>BTI</strong> (Armv8.5) — Branch Target Identification; defeats JOP.</li>
+        <li><strong>MTE</strong> (Armv8.5) — Memory Tagging; colour-tag pointer &amp; memory, hardware check on each access.</li>
+        <li><strong>PAN</strong> (v8.1), <strong>UAO</strong> (v8.2), <strong>SSBS</strong> (v8.5) — incremental kernel hardening.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr"><span class="tag">03</span><h2>TrustZone-A — Two Worlds, Four Exception Levels</h2></div>
+  <div class="cols cols-2">
+    <div>
+      <svg viewBox="0 0 340 280" style="width:100%;">
+        <rect x="10" y="10" width="320" height="260" rx="10" fill="#10101a" stroke="#f5a623"/>
+        <!-- Non-secure -->
+        <rect x="30" y="35" width="140" height="215" rx="6" fill="#102030" stroke="#60a5fa" stroke-width="1.5"/>
+        <text x="100" y="55" text-anchor="middle" fill="#60a5fa" font-family="Playfair Display" font-size="12" font-weight="700">Non-secure</text>
+        <rect x="50" y="75" width="100" height="30" rx="3" fill="#1a2540" stroke="#60a5fa"/>
+        <text x="100" y="94" text-anchor="middle" fill="#cdd6f4" font-family="JetBrains Mono" font-size="9">EL0 — apps</text>
+        <rect x="50" y="115" width="100" height="30" rx="3" fill="#1a2540" stroke="#60a5fa"/>
+        <text x="100" y="134" text-anchor="middle" fill="#cdd6f4" font-family="JetBrains Mono" font-size="9">EL1 — Linux</text>
+        <rect x="50" y="155" width="100" height="30" rx="3" fill="#1a2540" stroke="#60a5fa"/>
+        <text x="100" y="174" text-anchor="middle" fill="#cdd6f4" font-family="JetBrains Mono" font-size="9">EL2 — KVM</text>
+        <!-- Secure -->
+        <rect x="180" y="35" width="140" height="215" rx="6" fill="#2a1a0a" stroke="#f5a623" stroke-width="1.5"/>
+        <text x="250" y="55" text-anchor="middle" fill="#f5a623" font-family="Playfair Display" font-size="12" font-weight="700">Secure</text>
+        <rect x="200" y="75" width="100" height="30" rx="3" fill="#3a1e0a" stroke="#f5a623"/>
+        <text x="250" y="94" text-anchor="middle" fill="#cdd6f4" font-family="JetBrains Mono" font-size="9">S-EL0 — TAs</text>
+        <rect x="200" y="115" width="100" height="30" rx="3" fill="#3a1e0a" stroke="#f5a623"/>
+        <text x="250" y="134" text-anchor="middle" fill="#cdd6f4" font-family="JetBrains Mono" font-size="9">S-EL1 — OP-TEE</text>
+        <rect x="200" y="155" width="100" height="30" rx="3" fill="#3a1e0a" stroke="#f5a623"/>
+        <text x="250" y="174" text-anchor="middle" fill="#cdd6f4" font-family="JetBrains Mono" font-size="9">S-EL2 (v8.4)</text>
+        <!-- EL3 -->
+        <rect x="30" y="210" width="290" height="35" rx="4" fill="#2a0a1a" stroke="#f87171" stroke-width="1.5"/>
+        <text x="175" y="233" text-anchor="middle" fill="#f87171" font-family="JetBrains Mono" font-size="10" font-weight="700">EL3 — Secure Monitor (TF-A)</text>
+      </svg>
+    </div>
+    <div>
+      <ul>
+        <li><strong class="r">EL3</strong> is the only level that can toggle <span class="mono">SCR_EL3.NS</span> — the bit that switches the PE between Secure and Non-secure worlds.</li>
+        <li>Banked system registers and banked TTBR means each world has its own MMU configuration, caches tagged by NS.</li>
+        <li>S-EL2 (Armv8.4-A) added a separate Secure hypervisor for isolating trusted-application workloads.</li>
+        <li>Main use cases: <strong>DRM / Widevine L1</strong>, <strong>secure boot + attestation</strong>, <strong>fingerprint / face-ID matchers</strong>, <strong>payment applets</strong>, <strong>fTPM</strong>.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr"><span class="tag">04</span><h2>SMC Calling Convention &amp; TF-A</h2></div>
+  <div class="cols cols-2">
+    <div>
+      <ul>
+        <li><strong class="a">SMC #imm16</strong> — secure monitor call. Traps from EL1/EL2 (any world) to EL3.</li>
+        <li>Argument layout (<strong>SMCCC</strong>): X0 = function ID, X1-X17 = args, X0-X17 = return.</li>
+        <li>Function ID bit fields: Fast/Yielding, SMC32/SMC64, Owner (Arm / PSCI / SiP / TOS / vendor), Function number.</li>
+        <li>Canonical handlers:
+          <ul>
+            <li><strong>PSCI</strong> — Power State Coordination: <span class="mono">CPU_ON</span>, <span class="mono">CPU_OFF</span>, <span class="mono">SYSTEM_RESET</span>.</li>
+            <li><strong>SDEI</strong> — Software Delegated Exception Interface.</li>
+            <li><strong>TRNG / HVC</strong> — entropy, feature discovery.</li>
+          </ul>
+        </li>
+        <li>Canonical EL3 implementation is <strong>Arm Trusted Firmware-A (TF-A)</strong> — open-source, BSD-licensed, running on virtually every Cortex-A phone and server board.</li>
+      </ul>
+    </div>
+    <div>
+      <pre><code class="nohighlight">// Power on a secondary CPU via PSCI
+// Linux kernel function psci_cpu_on()
+
+  ldr   x0, =0xC4000003   // SMCCC: 64-bit, Arm, PSCI CPU_ON
+  mov   x1, x_cpuid       // target MPIDR
+  ldr   x2, =_text_phys   // entry PA
+  mov   x3, #0            // context arg
+  smc   #0                // trap to EL3
+
+// EL3 receives, routes to PSCI handler
+// which clocks on the core, programs its
+// reset vector, and returns success
+</code></pre>
+      <p class="small dim">SMCCC v1.3 adds SVE state handling &mdash; Z-regs must be saved/restored across SMC if SVE was in use in the caller.</p>
+    </div>
+  </div>
+</section>
+
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr"><span class="tag">05</span><h2>EL2 Hypervisor — Stage-2 Translation</h2></div>
+  <div class="cols cols-2">
+    <div>
+      <ul>
+        <li>Guest kernel runs at EL1 believing it has full control. Every guest memory access actually passes through <strong>two</strong> translation stages:
+          <ul>
+            <li><strong>Stage 1</strong> (guest): VA → IPA (Intermediate Physical Address).</li>
+            <li><strong>Stage 2</strong> (host): IPA → PA — owned by EL2 via <span class="mono">VTTBR_EL2</span>.</li>
+          </ul>
+        </li>
+        <li><strong>HCR_EL2</strong> traps: guest's reads/writes to sensitive system registers can be trapped to EL2 for emulation.</li>
+        <li><strong>VMID</strong> tags TLB entries so context-switching between VMs doesn't require flushing.</li>
+        <li><strong>vGIC</strong> — virtual GIC interface. Each VM sees what looks like a GIC; hypervisor context-switches the state.</li>
+        <li><strong>Timer virtualization</strong> — offset registers (<span class="mono">CNTVOFF_EL2</span>) give each VM its own view of the counter.</li>
+      </ul>
+    </div>
+    <div>
+      <div class="card amber">
+        <h3>Before Armv8.1: split hypervisor</h3>
+        <p>Host Linux ran at EL1, a small stub called <strong>KVM-lowvisor</strong> at EL2. Split-mode added overhead on every guest trap. Nobody liked it.</p>
+      </div>
+      <div class="card green" style="margin-top:0.4em;">
+        <h3 class="g">VHE (Armv8.1): host IN EL2</h3>
+        <p>Virtualization Host Extension re-aliases EL2 register names so Linux can run directly in EL2 as if it were EL1. One-level hypervisor. Default Linux ≥ 4.6 on VHE-capable cores.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr"><span class="tag">06</span><h2>pKVM — Android's Protected KVM</h2></div>
+  <div class="cols cols-2">
+    <div>
+      <ul>
+        <li>Android 13+ ships <strong>protected KVM</strong> on Armv8.2+ devices.</li>
+        <li>pKVM runs a <em>minimal</em> hypervisor at EL2 that isolates "protected VMs" even from the host Linux kernel.</li>
+        <li>Each protected VM gets memory that the host OS <strong>cannot read or write</strong> — enforced by Stage-2 and the Memory Protection Granule.</li>
+        <li>Use case: DRM playback, health sensors, biometric enclave — all without the size &amp; attack-surface of TrustZone.</li>
+        <li>Related: <strong>Gunyah</strong> (Qualcomm's open-source type-1 hypervisor, used on recent Snapdragons).</li>
+        <li>On Armv9-A, CCA / Realms subsume much of what pKVM does — cleanly architected across vendors.</li>
+      </ul>
+    </div>
+    <div>
+      <div class="card purple">
+        <h3 class="p">Type-1 vs type-2 vs hybrid</h3>
+        <p><strong>Type-1</strong>: hypervisor runs bare-metal (Xen, Gunyah). <strong>Type-2</strong>: on top of an OS (VirtualBox). KVM is hybrid — kernel-integrated but still type-1-like when VHE is enabled.</p>
+      </div>
+      <div class="card blue" style="margin-top:0.4em;">
+        <h3 class="b">Sigma-style workloads</h3>
+        <p>The "protected" workload pattern (small VM, strong isolation, measured boot) is where CCA Realms + pKVM + S-EL2 converge over the next few Cortex-A generations.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr"><span class="tag">07</span><h2>Pointer Authentication (PAC) — Armv8.3-A</h2></div>
+  <div class="cols cols-2">
+    <div>
+      <ul>
+        <li>A <strong>pointer = 64-bit value</strong>. Only ~48 bits are real VA; top bits are unused (or TBI tag).</li>
+        <li>PAC uses those top bits to store a <strong>short MAC</strong> (12-16 bits) computed from:
+          <ul>
+            <li>The pointer value itself</li>
+            <li>A secret <strong>key</strong> (APIAKey / APIBKey / APDAKey / APDBKey / APGAKey — stored in system registers)</li>
+            <li>A <strong>modifier</strong> (e.g., stack pointer for return addresses)</li>
+          </ul>
+        </li>
+        <li>Signing: <span class="mono">PACIA / PACIB</span> (instruction A/B), <span class="mono">PACDA / PACDB</span> (data). Verification: <span class="mono">AUTIA / AUTIB</span>.</li>
+        <li>Compressed canonical pair: <span class="mono">RETAA / RETAB</span> — authenticate LR and return in one instruction.</li>
+        <li>Cipher: <strong>QARMA-64</strong> (a round-reduced Feistel network). Lightweight, ~3-5 cycle latency.</li>
+      </ul>
+    </div>
+    <div>
+      <div class="card amber">
+        <h3>What it defeats</h3>
+        <p><strong>ROP (Return-Oriented Programming)</strong> — attacker who overwrites a stack return address can't forge a valid MAC → subsequent <span class="mono">RETAA</span> faults.</p>
+      </div>
+      <pre><code class="nohighlight">// Function prologue with PAC-RET
+
+caller:
+    paciasp                 // sign LR using SP as mod
+    stp  x29, x30, [sp,#-16]!
+    ...
+    ldp  x29, x30, [sp],#16
+    retaa                   // auth-then-ret (PACIA key A)
+
+// Attempting to return to attacker-chosen addr
+// → AUTIA gets a wrong value, top bits set to
+// an invalid canonical tag → translation fault
+</code></pre>
+    </div>
+  </div>
+</section>
+
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr"><span class="tag">08</span><h2>BTI — Branch Target Identification (Armv8.5-A)</h2></div>
+  <div class="cols cols-2">
+    <div>
+      <ul>
+        <li><strong>JOP</strong> (Jump-Oriented Programming) — attacker chains indirect <em>branches</em> (call/jmp) instead of returns. PAC defeats returns; BTI defeats JOP.</li>
+        <li>BTI marks legal indirect-branch targets with a new instruction: <span class="mono">BTI #{c|j|jc}</span> (a NOP on cores without BTI).</li>
+        <li>On a BTI-guarded page, an indirect branch to a non-BTI instruction faults with a BTI abort.</li>
+        <li>Modes: <span class="mono">c</span> (call), <span class="mono">j</span> (jump), <span class="mono">jc</span> (either). Each indirect branch instruction has a type (BLR → c, BR → j).</li>
+        <li>Compiler sets the page's BTI attribute in PTE <span class="mono">GP</span> (Guarded Page) bit; toolchain inserts <span class="mono">BTI</span> at function entries and jump-table slots.</li>
+        <li>Turned on in: Android NDK r21+, modern Fedora, Ubuntu 22.04 arm64 system libraries.</li>
+      </ul>
+    </div>
+    <div>
+      <div class="card green">
+        <h3 class="g">PAC + BTI together</h3>
+        <p>A fully hardened binary uses both: <strong>PAC-RET</strong> on function returns, <strong>BTI</strong> on indirect-branch targets. Together they cover both ROP and JOP.</p>
+      </div>
+      <pre><code class="nohighlight">// BTI-guarded callee
+func:
+    bti  c              // ok for BLR; faults on BR
+    paciasp             // sign return addr
+    ...
+
+// BTI ensures: attacker with indirect call
+// primitive (BLR x0) cannot jump into
+// mid-instruction gadgets.
+</code></pre>
+    </div>
+  </div>
+</section>
+
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr"><span class="tag">09</span><h2>MTE — Memory Tagging Extension (Armv8.5-A)</h2></div>
+  <div class="cols cols-2">
+    <div>
+      <ul>
+        <li>Each <strong>16-byte memory granule</strong> in DRAM has a 4-bit tag stored in a side-band region. Each pointer has a 4-bit tag in bits [59:56] (enabled by TBI).</li>
+        <li>On each memory access the CPU compares the pointer tag to the granule tag. Mismatch → fault or async report.</li>
+        <li>Malloc assigns a random 4-bit tag to each allocation; free re-tags the granule. UAF / OOB access has ~15/16 chance of catching the bug.</li>
+        <li>Modes (<span class="mono">TCR_EL1.TCF</span>):
+          <ul>
+            <li><strong>Async</strong>: fault reported later via SError — cheap, production-friendly.</li>
+            <li><strong>Sync</strong>: fault reported immediately — debug / heavy.</li>
+            <li><strong>Asymmetric</strong> (Armv8.7-A): sync on stores, async on loads.</li>
+          </ul>
+        </li>
+        <li>First shipping on <strong>Pixel 8</strong> (Tensor G3, A78C) in 2023. Extensively used by Chrome and Android runtime for UAF hunting.</li>
+      </ul>
+    </div>
+    <div>
+      <pre><code class="nohighlight">// MTE — allocate, use, free
+
+// 1. Random tag for new allocation
+irg     x0, x0, xzr          // insert random tag in x0
+stg     x0, [x0]              // set granule tag = pointer tag
+                              // (repeat for every 16B)
+
+// 2. Load/store — tag checked by hardware
+ldr     w1, [x0]              // tag match → ok
+ldr     w1, [x0, #16]         // tag match → ok
+ldr     w1, [x0, #1024]       // out-of-bounds → FAULT
+
+// 3. Free — retag the storage
+addg    x2, x0, #0, #1        // increment pointer tag
+stg     x2, [x0]              // retag memory
+</code></pre>
+    </div>
+  </div>
+</section>
+
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr"><span class="tag">10</span><h2>MTE vs HWASAN vs ASan</h2></div>
+  <table>
+    <tr><th>Tool</th><th>Mechanism</th><th>Overhead</th><th>Production?</th></tr>
+    <tr><td><span class="a">AddressSanitizer (ASan)</span></td><td>Software shadow memory + redzone checks (GCC/Clang instrumentation)</td><td>~2× CPU, 3× memory</td><td>Debug only</td></tr>
+    <tr><td><span class="a">HWASAN</span></td><td>Software tag-check using Top-Byte-Ignore (no MTE HW needed). 8-bit tag compared in instrumentation.</td><td>~15-30% CPU, 10% memory</td><td>Near-production (Android Fuzz)</td></tr>
+    <tr><td><span class="a">MTE (async)</span></td><td>Hardware tag check on every load/store; 4-bit tag</td><td>&lt; 5% CPU, &lt; 3% memory</td><td>Production (Pixel 8+)</td></tr>
+    <tr><td><span class="a">MTE (sync)</span></td><td>Same as async but precise</td><td>~10-20% CPU</td><td>Debug / diagnosis</td></tr>
+  </table>
+  <p class="small">HWASAN is "MTE in software" — the compiler emits the tag check before each access. It pioneered the tagging approach and is still used on non-MTE Arm hardware.</p>
+  <div class="card amber" style="margin-top:0.4em;">
+    <p>MTE is the first memory-safety primitive cheap enough to enable at scale in production. Google reports ~25% of Android 0-days were prevented/detected with MTE enabled in Chromium testing.</p>
+  </div>
+</section>
+
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr"><span class="tag">11</span><h2>RME — Realm Management Extension (Armv9-A)</h2></div>
+  <div class="cols cols-2">
+    <div>
+      <ul>
+        <li><strong>Four worlds</strong>, each with its own view of physical memory:
+          <ul>
+            <li><strong>Non-secure</strong> — host OS + guests (as before)</li>
+            <li><strong>Secure</strong> — trusted OS (as before)</li>
+            <li><strong class="a">Realm</strong> — new; isolated confidential-compute guests</li>
+            <li><strong class="a">Root</strong> — EL3 only; sits above all worlds</li>
+          </ul>
+        </li>
+        <li>Partition enforced by the <strong>Granule Protection Table (GPT)</strong> — a physical-memory-level firewall checked by every transaction on the interconnect (<strong>Granule Protection Check</strong>).</li>
+        <li>New secure monitor component: <strong>RMM</strong> (Realm Management Monitor) runs at R-EL2 and manages Realms on behalf of the Non-secure hypervisor.</li>
+        <li>Every AMBA 5 master needs <strong>NSE</strong> and <strong>NS</strong> signalling to distinguish the four worlds on the bus.</li>
+      </ul>
+    </div>
+    <div>
+      <svg viewBox="0 0 340 230" style="width:100%;">
+        <rect x="10" y="10" width="320" height="210" rx="10" fill="#10101a" stroke="#f5a623"/>
+        <text x="170" y="30" text-anchor="middle" fill="#f5a623" font-family="Playfair Display" font-size="12" font-weight="700">Armv9-A four worlds + Root</text>
+
+        <rect x="30" y="50" width="130" height="50" rx="4" fill="#1a2540" stroke="#60a5fa"/>
+        <text x="95" y="70" text-anchor="middle" fill="#60a5fa" font-family="JetBrains Mono" font-size="9">Non-secure</text>
+        <text x="95" y="87" text-anchor="middle" fill="#cdd6f4" font-family="JetBrains Mono" font-size="8">host OS, guests</text>
+
+        <rect x="180" y="50" width="130" height="50" rx="4" fill="#2a1a0a" stroke="#f5a623"/>
+        <text x="245" y="70" text-anchor="middle" fill="#f5a623" font-family="JetBrains Mono" font-size="9">Secure</text>
+        <text x="245" y="87" text-anchor="middle" fill="#cdd6f4" font-family="JetBrains Mono" font-size="8">TEE, TF-A partitions</text>
+
+        <rect x="30" y="110" width="130" height="50" rx="4" fill="#2a1a2a" stroke="#a78bfa"/>
+        <text x="95" y="130" text-anchor="middle" fill="#a78bfa" font-family="JetBrains Mono" font-size="9">Realm</text>
+        <text x="95" y="147" text-anchor="middle" fill="#cdd6f4" font-family="JetBrains Mono" font-size="8">confidential VMs</text>
+
+        <rect x="180" y="110" width="130" height="50" rx="4" fill="#2a0a1a" stroke="#f87171"/>
+        <text x="245" y="130" text-anchor="middle" fill="#f87171" font-family="JetBrains Mono" font-size="9">Root</text>
+        <text x="245" y="147" text-anchor="middle" fill="#cdd6f4" font-family="JetBrains Mono" font-size="8">EL3 only (TF-A)</text>
+
+        <rect x="30" y="175" width="285" height="30" rx="3" fill="#1a0f05" stroke="#f5a623"/>
+        <text x="172" y="195" text-anchor="middle" fill="#f5a623" font-family="JetBrains Mono" font-size="10">GPT — Granule Protection Table</text>
+      </svg>
+    </div>
+  </div>
+</section>
+
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr"><span class="tag">12</span><h2>CCA — Confidential Compute on Arm</h2></div>
+  <div class="cols cols-2">
+    <div>
+      <ul>
+        <li>CCA is the <strong>architectural umbrella</strong>: RME + RMM + attestation protocols + SDK.</li>
+        <li>Goal: confidential cloud workloads on Arm servers, where even the host hypervisor <strong>cannot read</strong> guest memory.</li>
+        <li>Mirrors (and interoperates with) Intel TDX and AMD SEV-SNP on x86.</li>
+        <li>Attestation chain: TF-A boot → RMM → Realm VM image hash → signed by silicon key → verifiable by the tenant before sending secrets.</li>
+        <li>First silicon: <strong>Neoverse V3 / N3</strong> (2024) and <strong>Armv9-A flagship phones</strong> that choose to enable it (e.g., Dimensity 9300 roadmap). Hyperscalers (AWS Graviton 4, Microsoft Cobalt 100) are prime consumers.</li>
+      </ul>
+    </div>
+    <div>
+      <div class="card purple">
+        <h3 class="p">RME vs TrustZone</h3>
+        <p>TrustZone separates Secure / Non-secure at <em>boot time</em> via SoC fuses. RME separates Realms <em>dynamically</em>, per-VM, with cryptographic attestation. TrustZone is for device-vendor secrets; Realms are for cloud-tenant secrets.</p>
+      </div>
+      <div class="card blue" style="margin-top:0.4em;">
+        <h3 class="b">Use case spectrum</h3>
+        <p>Cloud AI training / inference on customer data · Healthcare / finance tenants · Federated learning · Secure on-device LLM serving · Protected media playback on phones</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr"><span class="tag">13</span><h2>Kernel-Hardening PSTATE Flags</h2></div>
+  <table>
+    <tr><th>Flag</th><th>Version</th><th>Effect</th><th>Defeats</th></tr>
+    <tr><td><span class="a">PAN</span> (Privileged Access Never)</td><td>v8.1-A</td><td>Kernel (EL1) data access to EL0 pages faults</td><td>Accidental user-pointer deref in kernel</td></tr>
+    <tr><td><span class="a">UAO</span> (User Access Override)</td><td>v8.2-A</td><td>Explicit unprivileged loads/stores (<span class="mono">LDTR/STTR</span>) ignore PAN when needed</td><td>Preserves <span class="mono">copy_to_user</span> while PAN on</td></tr>
+    <tr><td><span class="a">PAN3</span></td><td>v8.7-A</td><td>PAN extended to instruction fetches</td><td>Execute-user-code-from-kernel bugs</td></tr>
+    <tr><td><span class="a">SSBS</span> (Speculative Store Bypass Safe)</td><td>v8.5-A</td><td>Opt-in per-thread mitigation against Spectre v4</td><td>Store → load speculative bypass</td></tr>
+    <tr><td><span class="a">DIT</span> (Data Independent Timing)</td><td>v8.4-A</td><td>Data-oblivious instruction timing</td><td>Timing side-channels in crypto</td></tr>
+    <tr><td><span class="a">TCO</span> (Tag Check Override)</td><td>v8.5-A (MTE)</td><td>Temporarily suppress MTE tag-check</td><td>Kernel memcpy that can span tags</td></tr>
+  </table>
+  <p class="small">Linux enables PAN + UAO + SSBS + PAC-RET + BTI by default on modern Armv8.5-A+ kernels. The combination is called <strong>"kernel pointer-authentication &amp; hardening"</strong> in the arm64 kconfig.</p>
+</section>
+
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr"><span class="tag">14</span><h2>Spectre / Meltdown on Cortex-A</h2></div>
+  <div class="cols cols-2">
+    <div>
+      <ul>
+        <li><strong>Meltdown (CVE-2017-5754)</strong> — Arm cores <em>not</em> generally vulnerable (the architecture specifies speculation doesn't bypass AP faults on most cores). Exception: a small number of older cores had partial exposure.</li>
+        <li><strong>Spectre v1 (bounds-check bypass)</strong> — all speculative cores vulnerable. Mitigation: <span class="mono">CSDB</span> / <span class="mono">SB</span> Barrier + masking + careful kernel-entry guards.</li>
+        <li><strong>Spectre v2 (BTB injection)</strong> — some early cores affected; mitigated with <strong>CSV2, CSV3</strong> features (v8.0-A retrofit) and <strong>SB</strong> Speculation Barrier (v8.5-A).</li>
+        <li><strong>Spectre v4 (store bypass)</strong> — mitigated by <strong>SSBS</strong> (v8.5-A) on a per-thread basis.</li>
+        <li>Straight-line-speculation fixes (<span class="mono">SB</span> after indirect branches, <span class="mono">DSB + ISB</span> on specific sequences) were added in response to Arm's own security advisories.</li>
+      </ul>
+    </div>
+    <div>
+      <div class="card red">
+        <h3 class="r">What Arm did architecturally</h3>
+        <p>Added explicit <strong>speculation barriers</strong> (<span class="mono">SB</span>, <span class="mono">CSDB</span>), per-thread mitigations (<span class="mono">SSBS</span>), and visibility flags (<span class="mono">CSV2</span>, <span class="mono">CSV3</span>) into <span class="mono">ID_AA64PFR0_EL1</span> so Linux can detect what each core does.</p>
+      </div>
+      <div class="card blue" style="margin-top:0.4em;">
+        <h3 class="b">The cost</h3>
+        <p>On Cortex-A55 the kernel-entry mitigations cost ~5% syscall throughput. On modern X-class cores with CSV2/CSV3 mandatory, the overhead is near-zero.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr"><span class="tag">15</span><h2>Lessons for the Interview</h2></div>
+  <div class="cols cols-2">
+    <div>
+      <ul>
+        <li><strong class="a">"TrustZone vs Realm vs Hypervisor — which do I pick?"</strong> → TrustZone for device-vendor secrets (fingerprint, DRM). Hypervisor for standard multi-tenant VMs. Realm (CCA) when the tenant doesn't trust the hypervisor — cloud confidential compute.</li>
+        <li><strong class="a">"How does PAC defeat ROP?"</strong> → signs function-pointer values with a key in a system register + context; attacker without that key cannot forge a valid signature; AUTIA fault on mismatch.</li>
+        <li><strong class="a">"Why does MTE use 4 bits?"</strong> → 4 bits fits in the pointer's unused top byte and in a reasonable DRAM side-band (8 GB → 256 MB tag memory at 4 bits / 16 B granule).</li>
+      </ul>
+    </div>
+    <div>
+      <ul>
+        <li><strong class="g">"VHE — what changed?"</strong> → EL2 register names aliased to behave like EL1. Lets Linux run bare in EL2; removes split-mode KVM overhead. 8.1-A feature.</li>
+        <li><strong class="g">"SMC vs HVC vs SVC?"</strong> → SVC traps EL0→EL1 (syscall). HVC traps EL1→EL2 (hypercall). SMC traps any→EL3 (monitor call / PSCI).</li>
+        <li><strong class="g">"Why BTI in addition to PAC?"</strong> → PAC protects returns (via signed LR); BTI protects forward indirect branches (JOP). Together they cover both halves of ROP/JOP attacks.</li>
+        <li><strong class="g">"What's the Granule Protection Table?"</strong> → physical-memory firewall at 4 KB granule, queried by interconnect on every transaction. Enforces the four-world RME separation.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr"><span class="tag">16</span><h2>Related Decks</h2></div>
+  <div class="cols cols-2">
+    <div>
+      <ul>
+        <li><a href="../02-armv8-a-architecture/" style="color:var(--blue);">Cortex-A 02 — Exception model + ELs</a> — prerequisites for this deck</li>
+        <li><a href="https://brendanjameslynskey.github.io/Cortex_M/08-trustzone/" style="color:var(--blue);">Cortex-M 08 — TrustZone for Armv8-M</a> — contrast: banked state vs banked worlds</li>
+        <li><a href="https://brendanjameslynskey.github.io/AMBA/06-future-of-amba/" style="color:var(--blue);">AMBA 06 — Future of AMBA, incl. RME / CCA hooks</a></li>
+        <li><a href="https://brendanjameslynskey.github.io/Neoverse/" style="color:var(--blue);">Neoverse Series</a> — server-side CCA deployment context</li>
+      </ul>
+    </div>
+    <div>
+      <div class="card amber">
+        <h3>Recommended external</h3>
+        <ul>
+          <li>Arm Trusted Firmware-A repo — real EL3 code</li>
+          <li>Google Project Zero — excellent PAC bypass analysis</li>
+          <li>Linux kernel <span class="mono">arch/arm64/kernel/cpu_errata.c</span> — catalog of speculative-exec mitigations per core</li>
+          <li>Android pKVM docs on source.android.com</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr"><span class="tag">17</span><h2>References</h2></div>
+  <div style="max-width:90%;margin:0 auto;font-size:0.58em;line-height:1.8;">
+    <p>
+      <strong class="a">Arm Ltd.</strong> — <em>DDI 0487</em> — A-profile spec: chapters on TrustZone, EL2, PAC, BTI, MTE, RME<br>
+      <strong class="a">Arm Ltd.</strong> — <em>Learn the architecture: Providing protection for complex software</em> — PAC/BTI/MTE walkthrough<br>
+      <strong class="a">Arm Ltd.</strong> — <em>Arm Confidential Compute Architecture (CCA) white paper</em> — RME + RMM + attestation<br>
+      <strong class="a">Arm Trusted Firmware-A</strong> — <a href="https://trustedfirmware.org">trustedfirmware.org</a> — open-source EL3 reference<br>
+      <strong class="a">Serebryany, K. et al.</strong> — &quot;Memory Tagging and how it improves C/C++ memory safety&quot; (Google Research)<br>
+      <strong class="a">Qualcomm Security White Papers</strong> — Gunyah, Secure Processing Unit architecture<br>
+      <strong class="a">Avanzi, R.</strong> — &quot;The QARMA block cipher family&quot; (IACR ToSC 2017) — the PAC cipher<br>
+      <strong class="a">Linux kernel</strong> — <span class="mono">Documentation/arm64/pointer-authentication.rst</span>, <span class="mono">mte.rst</span>, <span class="mono">bti.rst</span><br>
+      <strong class="a">Google Project Zero</strong> — &quot;Examining Pointer Authentication on the iPhone XS&quot; (2019)
+    </p>
+    <p style="color:var(--muted);margin-top:0.8em;font-size:0.85em">
+      Presentation built with <a href="https://revealjs.com">Reveal.js 4.6</a> · Playfair Display + DM Sans + JetBrains Mono<br>
+      Educational use.
+    </p>
+  </div>
+</section>
+
+</div></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/reveal.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/plugin/highlight/highlight.min.js"></script>
+<script>
+Reveal.initialize({ hash: true, slideNumber: 'c/t', transition: 'fade', transitionSpeed: 'fast', controls: true, progress: true, center: false, width: 1100, height: 900, margin: 0.01, plugins: [RevealHighlight], highlight: { theme: 'monokai' } });
+</script>
+<script>
+(function(){ var h = Reveal.getConfig().height || 900; var m = Reveal.getConfig().margin || 0.02; var maxH = Math.floor(h * (1 - 2 * m)) + 'px'; function fixSlides(){ document.querySelectorAll('.reveal .slides>section,.reveal .slides>section>section').forEach(function(s){ s.style.display = 'block'; s.style.maxHeight = maxH; }); } Reveal.on('ready', fixSlides); Reveal.on('slidechanged', fixSlides); })();
+</script>
+</body>
+</html>

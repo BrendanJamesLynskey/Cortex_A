@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>History &amp; the Cortex-A Family</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@400;500;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/reveal.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/theme/black.min.css">
+<style>
+  :root {
+    --amber:#f5a623;--green:#4ecb8d;--purple:#a78bfa;--blue:#60a5fa;--red:#f87171;
+    --bg:#0a0a0f;--bg2:#10101a;--bg3:#181824;--border:#2a2a3a;--text:#e8e8f0;--muted:#8888a8;
+  }
+  .reveal-viewport { background: var(--bg); }
+  .reveal .slides section { background: transparent; }
+  .reveal section { text-align: left; }
+  .reveal .slides > section { padding: 0.5em; overflow-y: auto !important; align-items: flex-start !important; justify-content: flex-start !important; }
+  .reveal .progress { color: var(--amber); height: 3px; }
+  .reveal .controls { color: var(--amber); }
+  .reveal section::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, var(--amber), var(--green)); }
+  .reveal { font-family: 'DM Sans', sans-serif; color: var(--text); font-size: 22px; }
+  .reveal .slide-number { font-family: 'JetBrains Mono', monospace; font-size: 0.7em; color: var(--muted); }
+  .reveal h1, .reveal h2, .reveal h3 { font-family: 'Playfair Display', serif; color: #fff; text-transform: none; letter-spacing: -0.01em; }
+  .reveal h1 { font-size: 2.4em; font-weight: 900; color: var(--amber); line-height: 1.1; }
+  .reveal h2 { font-size: 1.7em; font-weight: 700; color: var(--amber); margin-bottom: 0.6em; }
+  .reveal h3 { font-size: 1.2em; font-weight: 700; color: var(--green); margin-bottom: 0.3em; }
+  .reveal p  { font-size: 0.75em; line-height: 1.5; color: var(--text); }
+  .reveal li { font-size: 0.7em; line-height: 1.5; margin-bottom: 0.25em; }
+  .reveal code { font-family: 'JetBrains Mono', monospace; font-size: .72em; }
+  .reveal pre  { background: var(--bg3); border: 1px solid var(--border); border-radius: 8px; padding: 0.5em 1em; margin: 0.4em 0; width: 100%; box-shadow: none; }
+  .reveal pre code { font-size: 0.58em; line-height: 1.5; background: transparent; color: #cdd6f4; }
+  .slide-hdr { display: flex; align-items: center; gap: .4em; border-bottom: 1px solid var(--border); padding-bottom: .2em; margin-bottom: .3em; }
+  .slide-hdr .tag { font-family: 'JetBrains Mono', monospace; font-size: 0.55em; font-weight: 600; color: var(--bg); background: var(--amber); padding: .1em .4em; border-radius: 3px; letter-spacing: .04em; }
+  .slide-hdr h2 { margin: 0; font-size: 1.4em; }
+  .cols{display:grid;gap:1em;} .cols-2{grid-template-columns:1fr 1fr;} .cols-3{grid-template-columns:1fr 1fr 1fr;} .cols-6040{grid-template-columns:6fr 4fr;} .cols-4060{grid-template-columns:4fr 6fr;}
+  .card { background: var(--bg2); border: 1px solid var(--border); border-radius: 8px; padding: 1em 1.2em; box-shadow: 0 4px 20px rgba(0,0,0,0.3); margin: 0.4em 0; }
+  .card.amber { border-left: 3px solid var(--amber); } .card.green { border-left: 3px solid var(--green); } .card.purple{ border-left: 3px solid var(--purple); } .card.blue  { border-left: 3px solid var(--blue); } .card.red   { border-left: 3px solid var(--red); }
+  .card h3 { font-size: 1em; margin: 0 0 0.4em; }
+  .card p, .card ul  { font-size: 0.8em; margin: 0; color: #b8b8d0; } .card ul { padding-left: 1.2em; } .card li { font-size: 0.85em; margin-bottom: 0.25em; }
+  .reveal table { width: 100%; border-collapse: collapse; font-size: 0.65em; margin: 0.5em 0; }
+  .reveal table th { background: var(--bg3); color: var(--amber); padding: 0.5em 0.7em; border: 1px solid var(--border); text-align: left; font-weight: 700; }
+  .reveal table td { padding: 0.5em 0.7em; border: 1px solid var(--border); color: #ccc; vertical-align: top; }
+  .reveal table tr:nth-child(even) td { background: #0e0e18; }
+  .a{color:var(--amber);font-weight:600;} .g{color:var(--green);font-weight:600;} .p{color:var(--purple);font-weight:600;} .b{color:var(--blue);font-weight:600;} .r{color:var(--red);font-weight:600;} .mono{font-family:'JetBrains Mono',monospace;}
+  svg.diagram { display: block; margin: 0 auto; overflow: visible; }
+  .pill { display: inline-block; font-family: 'JetBrains Mono', monospace; font-size: 0.6em; padding: 0.15em 0.6em; border-radius: 999px; border: 1px solid; margin: 0 .08em; }
+  .pill.amber{color:var(--amber);border-color:var(--amber);} .pill.green{color:var(--green);border-color:var(--green);} .pill.purple{color:var(--purple);border-color:var(--purple);} .pill.blue{color:var(--blue);border-color:var(--blue);} .pill.red{color:var(--red);border-color:var(--red);}
+  .title-slide h1 { font-size: 2.4em; } .title-slide .subtitle { font-size: 0.85em; color: var(--green); font-weight: 400; letter-spacing: 0.06em; margin: 0.3em 0 0.6em; } .title-slide .meta { font-size: 0.6em; color: var(--muted); font-family: 'JetBrains Mono', monospace; }
+  .dim { color: var(--muted); } .small { font-size: 0.65em; } .smaller { font-size: 0.55em; } .tiny { font-size: 0.48em; }
+  .reveal ul, .reveal ol { margin: .15em 0 .15em 1em; }
+  .quote { font-style: italic; color: #ccc; padding: 0.5em 1em; border-left: 3px solid var(--blue); background: var(--bg2); border-radius: 4px; font-size: 0.8em; }
+  .quote cite { display: block; font-size: 0.72em; color: var(--muted); font-style: normal; margin-top: 0.4em; }
+
+  .tl { font-family: 'JetBrains Mono', monospace; font-size: 0.68em; display: grid; grid-template-columns: 90px 20px 1fr; gap: 0.2em 0.5em; margin: 0.3em 0; }
+  .tl .yr { color: var(--amber); font-weight: 700; text-align: right; padding-top: 0.35em; }
+  .tl .dot { color: var(--green); text-align: center; padding-top: 0.35em; font-size: 0.9em; }
+  .tl .ev { background: var(--bg2); border-left: 3px solid var(--border); border-radius: 4px; padding: 0.4em 0.7em; color: #cdd6f4; }
+  .tl .ev strong { color: var(--amber); }
+  .tl .ev.hi { border-left-color: var(--amber); background: #1a0f05; }
+
+  .core-picker { display: flex; gap: 6px; margin: 0.4em 0; font-family: 'JetBrains Mono', monospace; font-size: 0.6em; flex-wrap: wrap; }
+  .core-picker .btn { cursor: pointer; padding: 0.35em 0.7em; border: 1px solid var(--border); border-radius: 5px; background: var(--bg2); color: var(--text); transition: all 0.15s; }
+  .core-picker .btn:hover { border-color: var(--amber); color: var(--amber); }
+  .core-picker .btn.active { background: var(--amber); color: var(--bg); border-color: var(--amber); font-weight: 700; }
+  .core-info { background: var(--bg2); border: 1px solid var(--border); border-left: 3px solid var(--amber); border-radius: 6px; padding: 0.7em 1em; margin-top: 0.3em; font-size: 0.72em; min-height: 150px; }
+  .core-info .t { color: var(--amber); font-weight: 700; font-family: 'Playfair Display', serif; font-size: 1.2em; margin-bottom: 0.15em; }
+  .core-info .s { color: var(--green); font-family: 'JetBrains Mono', monospace; font-size: 0.82em; margin-bottom: 0.3em; }
+  .core-info ul { margin: 0.2em 0 0 1em; font-size: 0.9em; }
+</style>
+</head>
+<body>
+<div class="reveal">
+<div class="slides">
+
+<section class="title-slide" data-background-color="#0a0a0f">
+  <div style="font-family:'JetBrains Mono',monospace;font-size:.5em;color:var(--muted);margin-bottom:.4em;letter-spacing:.1em;">ARM CORTEX-A · PRESENTATION 01</div>
+  <h1>History &amp; the Cortex-A Family</h1>
+  <div class="subtitle">From ARM11 to Cortex-X925 · Two decades of the Application Profile</div>
+  <div style="width:60px;height:3px;background:var(--amber);margin-bottom:1.4em;"></div>
+  <div class="meta">ARM11 · Cortex-A8 · A9 · A15 · A53 · A72-A78 · Cortex-X · DynamIQ · Armv9-A</div>
+  <div class="meta" style="margin-top:1em;">Navigate: <span class="mono">→ ←</span> &nbsp;|&nbsp; Overview: <span class="mono">Esc</span> &nbsp;|&nbsp; Fullscreen: <span class="mono">F</span></div>
+</section>
+
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr"><span class="tag">02</span><h2>Why the A-Profile Matters</h2></div>
+  <div class="cols cols-2">
+    <div>
+      <ul>
+        <li>The A-profile is the half of Arm that ships in every <strong>smartphone, tablet, Chromebook, and increasingly laptop &amp; server</strong> — billions of cores per year.</li>
+        <li>It is also where Arm does its <strong>hardest engineering</strong>: out-of-order execution, SVE, full MMUs, big.LITTLE / DynamIQ, hypervisor support.</li>
+        <li>The 2004 Cortex profile split created three families — M (microcontroller), R (real-time), A (application). <span class="a">A</span> is the one Arm's revenue depends on.</li>
+        <li>Two decades on: ARM11 → Cortex-X925 is the story of mobile computing itself — and the template Neoverse later reused for servers.</li>
+      </ul>
+    </div>
+    <div>
+      <div class="quote">
+        "When we split the Cortex profiles in 2004, we weren't sure the A-profile would outgrow the classic ARM9/11 lines. Ten years later it was everywhere."
+        <cite>— Mike Muller, Arm CTO (2004-2017), paraphrased</cite>
+      </div>
+      <div class="card amber" style="margin-top:0.6em;">
+        <p>Understanding A-profile history is how you answer <em>"why do modern Arm SoCs look the way they do?"</em> — every design choice, from ASID-tagged TLBs to SVE, traces to a specific mobile-era pain point.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr"><span class="tag">03</span><h2>Pre-Cortex: the ARM11 Classic Cores (2002-2008)</h2></div>
+  <div class="cols cols-2">
+    <div>
+      <ul>
+        <li><strong class="a">ARM1136JF-S</strong> — the first ARMv6 core. 8-stage pipeline, Jazelle bytecode, VFPv2, <strong>first Arm with full MMU + caches + TrustZone</strong>.</li>
+        <li>Shipped in the iPhone 1 / iPhone 3G and first-gen Nokia Nseries — before <em>Cortex</em> was a brand.</li>
+        <li><strong class="a">ARM1176JZF-S</strong> added TrustZone v1. Raspberry Pi 1 / Zero still uses this core today (2025).</li>
+        <li><strong class="a">ARM11 MPCore</strong> (2004) — Arm's first multi-core effort. Up to 4 cores with snoop-control unit. Proved SMP was feasible in the Arm ISA.</li>
+        <li>Limitations: only Armv6 (no NEON SIMD), modest IPC, no branch-predictor-worthy OoO. Needed a clean-sheet successor.</li>
+      </ul>
+    </div>
+    <div>
+      <div class="card green">
+        <h3 class="g">The 2004 Cortex profile split</h3>
+        <p>One ISA, three mutually incompatible profiles with different MMUs, exception models, and licence bundles:</p>
+        <ul>
+          <li><strong>Cortex-A</strong> — Application: full MMU, Linux-class.</li>
+          <li><strong>Cortex-R</strong> — Real-time: MPU, deterministic.</li>
+          <li><strong>Cortex-M</strong> — Microcontroller: Thumb-only, NVIC.</li>
+        </ul>
+      </div>
+      <div class="card blue" style="margin-top:0.4em;">
+        <h3 class="b">Cortex-A8 was the first A</h3>
+        <p>Announced 2005, shipping silicon 2007-2009. The profile split made sense only once the first A-core proved it.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr"><span class="tag">04</span><h2>Cortex-A8 — First of the Line (2005 / 2009 ship)</h2></div>
+  <div class="cols cols-2">
+    <div>
+      <ul>
+        <li><strong class="a">First Armv7-A core</strong> — introduced the full application-profile ISA that ran Linux, iOS, and Android until the 2014 AArch64 switch.</li>
+        <li><strong>13-stage dual-issue in-order pipeline</strong>. No OoO — Arm deliberately kept it simple to hit 600 MHz – 1 GHz in 65 nm mobile process.</li>
+        <li>First Arm with <strong>NEON</strong> (Advanced SIMD) — 128-bit integer / single-precision SIMD. Completely reshaped the mobile media pipeline.</li>
+        <li>Separate L1 I/D and an optional <strong>unified L2</strong> up to 1 MB — caches became standard from here on.</li>
+        <li>Shipping platforms: <strong>TI OMAP3 (Nokia N900, BeagleBoard), Samsung Exynos 3110 (iPhone 3GS, Galaxy S1), Freescale i.MX51, Apple A4</strong>.</li>
+      </ul>
+    </div>
+    <div>
+      <svg viewBox="0 0 320 220" style="width:100%;">
+        <rect x="10" y="10" width="300" height="200" rx="10" fill="#10101a" stroke="#f5a623"/>
+        <text x="160" y="38" text-anchor="middle" fill="#f5a623" font-family="Playfair Display" font-weight="700" font-size="16">Cortex-A8 (2005 IP, 2009 silicon)</text>
+        <g font-family="JetBrains Mono" font-size="11" fill="#cdd6f4">
+          <text x="30" y="62">Architecture ...... Armv7-A</text>
+          <text x="30" y="82">Pipeline .......... 13-stage dual-issue</text>
+          <text x="30" y="102">Execution ......... in-order</text>
+          <text x="30" y="122">SIMD .............. NEON (128-bit)</text>
+          <text x="30" y="142">FPU ............... VFPv3</text>
+          <text x="30" y="162">Clock target ...... 600 MHz – 1 GHz</text>
+          <text x="30" y="182">L2 ................ optional, up to 1 MB</text>
+          <text x="30" y="202">MMU ............... VMSAv7 (32-bit)</text>
+        </g>
+      </svg>
+      <p class="smaller dim" style="margin-top:0.3em;">The "smartphone CPU" that made modern smartphones possible.</p>
+    </div>
+  </div>
+</section>
+
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr"><span class="tag">05</span><h2>Cortex-A9 — First Multi-Core &amp; First OoO (2007 / 2011)</h2></div>
+  <div class="cols cols-2">
+    <div>
+      <ul>
+        <li>First Arm with <strong class="a">out-of-order execution</strong> — dual-issue, 8-stage, speculative, with a proper ROB and rename.</li>
+        <li>First multi-core Cortex — the <strong>Cortex-A9 MPCore</strong> (up to 4 cores) with an integrated <strong>SCU</strong> (Snoop Control Unit) and shared L2.</li>
+        <li>Flagship platforms: <strong>Nvidia Tegra 2 / Tegra 3</strong> (first quad-core Android), <strong>TI OMAP4</strong>, <strong>Samsung Exynos 4210</strong> (Galaxy S2, Galaxy SIII international), <strong>Apple A5</strong> (iPhone 4S, iPad 2).</li>
+        <li>Brought <strong>TrustZone v2</strong> refinements + PL310 L2 controller into the mainstream.</li>
+        <li>The A9 era is when "Arm in anything" became "Arm in everything" — 2011 ships hit &gt;1 B shipped cortex-A units.</li>
+      </ul>
+    </div>
+    <div>
+      <div class="card amber">
+        <h3>Why A9 chose OoO</h3>
+        <p>Mobile workloads (browser JS, JPEG decode, video post-processing) are cache-bound and branchy. In-order A8 stalled on the same cache misses OoO could absorb. Going to 2-wide OoO at 1 GHz delivered <strong>~30% higher IPC</strong> than A8 at the same clock.</p>
+      </div>
+      <div class="card blue" style="margin-top:0.4em;">
+        <h3 class="b">Cortex-A5 sibling</h3>
+        <p>A tiny in-order Armv7-A core released alongside A9 for low-cost phones &amp; set-top boxes. First hint of the "big/little" idea.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr"><span class="tag">06</span><h2>Cortex-A15 + A7 — big.LITTLE is Born (2011)</h2></div>
+  <div class="cols cols-2">
+    <div>
+      <ul>
+        <li><strong class="a">Cortex-A15</strong> — 3-issue OoO, 15-stage, LPAE (40-bit physical addresses), hardware virtualization (first Arm with <strong>EL2</strong>-equivalent Hyp mode). Designed by Arm Austin.</li>
+        <li>Much faster than A9 but <strong>~3× the power</strong>. Pairing it with a <strong>Cortex-A7</strong> (in-order, A5-like but with virt support) gave Arm their <strong>big.LITTLE</strong> story.</li>
+        <li>CCI-400 cache-coherent interconnect (AMBA 4 ACE) glues the two clusters. OS migrates threads between clusters at runtime (IKS, then GTS).</li>
+        <li>First devices: <strong>Exynos 5 Octa</strong> (Galaxy S4, Note 3), Mediatek Helio X10, Renesas R-Car H2.</li>
+        <li>Remembered as a rough first generation — thread-migration latency, OS support, thermal throttling all needed a second pass.</li>
+      </ul>
+    </div>
+    <div>
+      <svg viewBox="0 0 340 220" style="width:100%;">
+        <rect x="10" y="10" width="320" height="200" rx="10" fill="#10101a" stroke="#f5a623"/>
+        <text x="170" y="34" text-anchor="middle" fill="#f5a623" font-family="Playfair Display" font-weight="700" font-size="14">big.LITTLE (2011-2017)</text>
+        <rect x="30" y="55" width="130" height="55" rx="6" fill="#1a2540" stroke="#60a5fa"/>
+        <text x="95" y="78" text-anchor="middle" fill="#60a5fa" font-family="JetBrains Mono" font-size="11">Cortex-A15</text>
+        <text x="95" y="95" text-anchor="middle" fill="#cdd6f4" font-family="JetBrains Mono" font-size="9">big · 3-wide OoO</text>
+        <rect x="180" y="55" width="130" height="55" rx="6" fill="#1f3a1f" stroke="#4ecb8d"/>
+        <text x="245" y="78" text-anchor="middle" fill="#4ecb8d" font-family="JetBrains Mono" font-size="11">Cortex-A7</text>
+        <text x="245" y="95" text-anchor="middle" fill="#cdd6f4" font-family="JetBrains Mono" font-size="9">LITTLE · in-order</text>
+        <rect x="60" y="130" width="220" height="40" rx="5" fill="#1a0f05" stroke="#f5a623"/>
+        <text x="170" y="156" text-anchor="middle" fill="#f5a623" font-family="JetBrains Mono" font-size="11">CCI-400 (ACE coherent)</text>
+        <line x1="95"  y1="110" x2="95"  y2="130" stroke="#8888a8"/>
+        <line x1="245" y1="110" x2="245" y2="130" stroke="#8888a8"/>
+        <text x="170" y="195" text-anchor="middle" fill="#8888a8" font-family="JetBrains Mono" font-size="10">DRAM / L3 / GPU / Display</text>
+      </svg>
+    </div>
+  </div>
+</section>
+
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr"><span class="tag">07</span><h2>The AArch64 Pivot — Cortex-A53 / A57 (2012 IP, 2014 silicon)</h2></div>
+  <div class="cols cols-2">
+    <div>
+      <ul>
+        <li><strong class="a">Armv8-A announced October 2011</strong> — first Arm with a 64-bit ISA (<span class="mono">A64</span>), 31 × 64-bit GPRs, fixed 32-bit encoding, redesigned exception model.</li>
+        <li><strong class="a">Cortex-A57</strong> — big core, 3-wide OoO, ~40% faster than A15. <strong>Cortex-A53</strong> — little core, in-order, replaces A7 in a new big.LITTLE pair.</li>
+        <li>Also launched: <strong>Cortex-A35</strong> (2015) as the A53's successor for wearables.</li>
+        <li>First shipping A53 silicon: <strong>Apple A7 (Sept 2013)</strong> was actually Apple's own Armv8-A design (Cyclone) — <em>beat Arm to market</em> by a year.</li>
+        <li>Arm-core Armv8 mass shipment: <strong>Samsung Exynos 5433</strong> (Note 4), <strong>Qualcomm Snapdragon 810</strong> (A57+A53), <strong>MediaTek Helio X10</strong>.</li>
+        <li>Armv8-A also brought <strong>NEON with full double-precision FP</strong>, strong release/acquire memory ordering primitives, and the <strong>AES/SHA crypto extensions</strong>.</li>
+      </ul>
+    </div>
+    <div>
+      <div class="card green">
+        <h3 class="g">Why 64-bit mattered for phones</h3>
+        <p>Not the address space — it was the <strong>register file</strong>. 31 × 64-bit registers crushed Armv7's 16 × 32-bit, cutting spills in compiled code by ~30%. Also fixed the memory-ordering model to be rigorously specified.</p>
+      </div>
+      <div class="card red" style="margin-top:0.4em;">
+        <h3 class="r">The Apple A7 shock</h3>
+        <p>Apple silicon engineering was years ahead — they shipped the first Armv8-A phone SoC while Arm's own big cores were still a year from silicon. Arm has been chasing them ever since.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr"><span class="tag">08</span><h2>Annual Flagships — A72, A73, A75, A76, A77, A78</h2></div>
+  <table>
+    <tr><th>Core</th><th>Year</th><th>Design site</th><th>Pipeline</th><th>Key addition</th></tr>
+    <tr><td><span class="a">Cortex-A72</span></td><td>2015</td><td>Austin</td><td>3-wide OoO, 15-stage</td><td>Major IPC jump over A57; first &quot;premium&quot; Arm core</td></tr>
+    <tr><td><span class="a">Cortex-A73</span></td><td>2016</td><td>Sophia (ex-TI)</td><td>2-wide OoO, 11-stage</td><td>Narrower / shorter — area + power wins for mid-range</td></tr>
+    <tr><td><span class="a">Cortex-A75</span></td><td>2017</td><td>Austin</td><td>3-wide OoO, DynamIQ-native</td><td>First DynamIQ-capable core; Armv8.2-A</td></tr>
+    <tr><td><span class="a">Cortex-A76</span></td><td>2018</td><td>Austin</td><td>4-wide OoO, 13-stage</td><td>Armv8.2-A + bfloat16 (A76AE)</td></tr>
+    <tr><td><span class="a">Cortex-A77</span></td><td>2019</td><td>Austin</td><td>4-wide OoO, 13-stage</td><td>~20% IPC over A76; wider FP/NEON</td></tr>
+    <tr><td><span class="a">Cortex-A78</span></td><td>2020</td><td>Austin</td><td>4-wide OoO, 13-stage</td><td>Efficiency tune of A77 on 5 nm; Armv8.2-A + MTE</td></tr>
+  </table>
+  <p class="small" style="margin-top:0.6em;">A72 → A78 were the <strong>"big" half of big.LITTLE / DynamIQ</strong>. Cadence: one flagship per year, aligned to the annual smartphone SoC tape-out window. Austin has owned this roadmap since A57.</p>
+</section>
+
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr"><span class="tag">09</span><h2>Cortex-X &quot;Custom Cores&quot; (2020-)</h2></div>
+  <div class="cols cols-2">
+    <div>
+      <ul>
+        <li>From 2020 Arm split the big core into <strong>two</strong> yearly deliveries: a <strong>Cortex-A flagship</strong> (balanced) and a <strong>Cortex-X</strong> (all-out perf).</li>
+        <li>The X program (codename <em>Hera</em>) lets key customers pay for a bigger-than-standard die budget — wider fetch, more ROB, bigger L2, faster branch predictor.</li>
+        <li><strong class="a">X1</strong> (2020) — 5-wide decode, 8-wide issue, 1 MB L2. Launched in Exynos 2100 &amp; Snapdragon 888.</li>
+        <li><strong class="a">X2</strong> (2021) — first Armv9-A. AArch64-only (dropped AArch32 at EL0).</li>
+        <li><strong class="a">X3</strong> (2022) — 6-wide decode. Mediatek Dimensity 9200, Snapdragon 8 Gen 2.</li>
+        <li><strong class="a">X4</strong> (2023) — 10-wide dispatch, 384-entry ROB. Dimensity 9300 (3 × X4 + 4 × A720, no little core).</li>
+        <li><strong class="a">X925</strong> (2024, codename <em>Blackhawk</em>) — 10-wide decode, ~15% IPC over X4. New naming (&quot;9&quot; = premium, &quot;25&quot; = 2025 platform).</li>
+      </ul>
+    </div>
+    <div>
+      <div class="card amber">
+        <h3>Why a separate X family?</h3>
+        <p>The Austin A-flagship cadence was constrained by mid-range power/area budgets. Customers like Samsung, Qualcomm, and MediaTek wanted "go-big" cores for benchmarks. X lets Arm ship those without bending the whole A-line.</p>
+      </div>
+      <div class="card purple" style="margin-top:0.4em;">
+        <h3 class="p">Cortex-X is still Arm IP</h3>
+        <p>Not to be confused with Nuvia / Oryon / Apple-style "custom architecture licensees" who build their own microarchitecture under the Armv9-A ISA. Cortex-X comes as an Arm-delivered RTL drop.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr"><span class="tag">10</span><h2>Armv9-A — The 2021 Generation</h2></div>
+  <div class="cols cols-2">
+    <div>
+      <ul>
+        <li>Announced March 2021. Same ISA lineage as Armv8-A (it's Armv8.5-A-plus in practice) but <strong>mandates</strong> features that were optional before:</li>
+        <li><strong class="a">SVE2</strong> (Scalable Vector Extension v2) — mandatory. Finally brings vectors to mobile.</li>
+        <li><strong class="a">MTE</strong> (Memory Tagging Extension) mandated on profiles that include it.</li>
+        <li><strong class="a">RME / CCA</strong> (Realm Management Extension, Confidential Compute Architecture) — new "Realm" world alongside Secure / Non-secure / Root.</li>
+        <li><strong class="a">MPAM v1</strong>, BRBE, TRBE for RAS + profiling.</li>
+        <li>First Armv9 cores: <strong>Cortex-X2, A710, A510</strong> (the "Matterhorn" platform).</li>
+        <li>X2 / A710 / A510 shipped in 2022's <strong>Snapdragon 8 Gen 1</strong> and <strong>Dimensity 9000</strong>.</li>
+      </ul>
+    </div>
+    <div>
+      <div class="card green">
+        <h3 class="g">Armv9-A != new ISA</h3>
+        <p>Marketing made it sound like a clean slice. In reality it's mostly: "take Armv8.5-A, add SVE2 &amp; CCA, mandate MTE". Existing Armv8-A software continues to run. The name is a branding reset — useful for customers too, after a decade of "Armv8.0 through v8.7".</p>
+      </div>
+      <div class="card red" style="margin-top:0.4em;">
+        <h3 class="r">AArch32 starts dying</h3>
+        <p>X2, A710 dropped AArch32 at EL1-EL3; A510 became <strong>AArch64-only at all ELs</strong>. 32-bit Android apps had to migrate — the cut-off that ended "32-bit phones".</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr"><span class="tag">11</span><h2>Today's Flagships — A520 / A720 / A725 / X925 (2024)</h2></div>
+  <table>
+    <tr><th>Core</th><th>Role</th><th>Year</th><th>Armv</th><th>Notes</th></tr>
+    <tr><td><span class="a">Cortex-A520</span></td><td>LITTLE</td><td>2023</td><td>v9.2</td><td>Dual-core complex (share L2/FPU) for area. AArch64-only.</td></tr>
+    <tr><td><span class="a">Cortex-A720</span></td><td>middle</td><td>2023</td><td>v9.2</td><td>Successor to A715. IPC ~10% over A715, power reduced.</td></tr>
+    <tr><td><span class="a">Cortex-A725</span></td><td>middle+</td><td>2024</td><td>v9.2</td><td>Incremental A720 refresh — &quot;Chaberton&quot; platform.</td></tr>
+    <tr><td><span class="a">Cortex-X925</span></td><td>big</td><td>2024</td><td>v9.2</td><td>&quot;Blackhawk&quot;. 10-wide decode, huge BTB, new TAGE-SC-L-style predictor.</td></tr>
+    <tr><td><span class="a">Cortex-A325</span></td><td>ultra-LITTLE</td><td>2024</td><td>v9.2</td><td>First Armv9-A for MCUs/embedded Linux class — replaces A35.</td></tr>
+  </table>
+  <p class="small" style="margin-top:0.4em;">New naming scheme: 3-digit suffix = platform year (&quot;925&quot; = 2025 platform). The Cortex-X925 + A725 + A520 triple is what ships in <strong>Dimensity 9400, Snapdragon 8 Gen 4 / 8 Elite, Exynos 2500</strong>.</p>
+</section>
+
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr"><span class="tag">12</span><h2>big.LITTLE → DynamIQ (2017)</h2></div>
+  <div class="cols cols-2">
+    <div>
+      <ul>
+        <li><strong class="r">big.LITTLE limitation</strong>: two fixed-size clusters, each with its own L2. OS must migrate threads between clusters to go fast ↔ low-power. Coherency via an external CCI.</li>
+        <li><strong class="g">DynamIQ</strong> (2017, introduced with <strong>Cortex-A75/A55</strong>): single cluster, up to 8 heterogeneous cores, a shared L3, per-core asynchronous voltage/frequency.</li>
+        <li>The coherence fabric — the <strong>DynamIQ Shared Unit (DSU)</strong> — absorbs what CCI used to do plus gives a shared L3.</li>
+        <li>Enables the iconic <strong>1 + 3 + 4</strong> layout (1 × X, 3 × A-mid, 4 × A-little) inside a single DSU cluster — impossible under big.LITTLE.</li>
+        <li>DSU-110 (2021) scales to 8 cores + 16 MB L3. DSU-120 (2023) adds slice counts up to 14 cores.</li>
+      </ul>
+    </div>
+    <div>
+      <svg viewBox="0 0 340 240" style="width:100%;">
+        <rect x="10" y="10" width="320" height="220" rx="10" fill="#10101a" stroke="#f5a623"/>
+        <text x="170" y="32" text-anchor="middle" fill="#f5a623" font-family="Playfair Display" font-weight="700" font-size="14">DynamIQ 1+3+4 cluster</text>
+        <!-- X -->
+        <rect x="30" y="50" width="60" height="42" rx="5" fill="#2a1a0a" stroke="#f5a623"/>
+        <text x="60" y="76" text-anchor="middle" fill="#f5a623" font-family="JetBrains Mono" font-size="10">X925</text>
+        <!-- A725 x3 -->
+        <rect x="100" y="50" width="130" height="42" rx="5" fill="#1a2540" stroke="#60a5fa"/>
+        <text x="165" y="68" text-anchor="middle" fill="#60a5fa" font-family="JetBrains Mono" font-size="9">3 × Cortex-A725</text>
+        <text x="165" y="84" text-anchor="middle" fill="#cdd6f4" font-family="JetBrains Mono" font-size="8">(mid)</text>
+        <!-- A520 x4 -->
+        <rect x="240" y="50" width="75" height="42" rx="5" fill="#1f3a1f" stroke="#4ecb8d"/>
+        <text x="277" y="68" text-anchor="middle" fill="#4ecb8d" font-family="JetBrains Mono" font-size="9">4 × A520</text>
+        <text x="277" y="84" text-anchor="middle" fill="#cdd6f4" font-family="JetBrains Mono" font-size="8">(little)</text>
+        <!-- DSU -->
+        <rect x="30" y="110" width="285" height="50" rx="6" fill="#1a0f05" stroke="#f5a623"/>
+        <text x="172" y="130" text-anchor="middle" fill="#f5a623" font-family="JetBrains Mono" font-size="11">DSU-120 (shared L3)</text>
+        <text x="172" y="150" text-anchor="middle" fill="#8888a8" font-family="JetBrains Mono" font-size="9">SCU · L3 slices · Snoop filter · AMBA 5 CHI egress</text>
+        <line x1="60"  y1="92" x2="60"  y2="110" stroke="#8888a8"/>
+        <line x1="165" y1="92" x2="165" y2="110" stroke="#8888a8"/>
+        <line x1="277" y1="92" x2="277" y2="110" stroke="#8888a8"/>
+        <!-- egress -->
+        <rect x="80" y="175" width="190" height="40" rx="5" fill="#0e0e18" stroke="#8888a8"/>
+        <text x="175" y="200" text-anchor="middle" fill="#cdd6f4" font-family="JetBrains Mono" font-size="10">CMN / NIC-600 · DRAM · GPU · NPU</text>
+      </svg>
+    </div>
+  </div>
+</section>
+
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr"><span class="tag">13</span><h2>Interactive — Pick a Cortex-A Core</h2></div>
+  <div class="core-picker" id="cp">
+    <div class="btn active" data-k="a8">A8</div>
+    <div class="btn" data-k="a9">A9</div>
+    <div class="btn" data-k="a15">A15</div>
+    <div class="btn" data-k="a53">A53</div>
+    <div class="btn" data-k="a57">A57</div>
+    <div class="btn" data-k="a72">A72</div>
+    <div class="btn" data-k="a76">A76</div>
+    <div class="btn" data-k="a78">A78</div>
+    <div class="btn" data-k="x1">X1</div>
+    <div class="btn" data-k="a520">A520</div>
+    <div class="btn" data-k="a725">A725</div>
+    <div class="btn" data-k="x925">X925</div>
+  </div>
+  <div class="core-info" id="ci"></div>
+  <script>
+    const data = {
+      a8:   {t:'Cortex-A8',   s:'Armv7-A · 2005 IP · 2009 ship',
+             b:['First A-profile core','13-stage dual-issue, in-order','First core with NEON','iPhone 3GS, TI OMAP3, Exynos 3110','No OoO — kept simple for 65 nm power']},
+      a9:   {t:'Cortex-A9',   s:'Armv7-A · 2007 IP · 2011 ship',
+             b:['First Arm OoO core (2-wide)','First multi-core Cortex (MPCore, up to 4)','SCU + shared L2','Tegra 2/3, OMAP4, Apple A5','~30% higher IPC than A8']},
+      a15:  {t:'Cortex-A15',  s:'Armv7-A · 2010 IP · 2013 ship',
+             b:['3-issue OoO, 15-stage','First Arm with Hyp mode (virtualization)','LPAE — 40-bit physical addresses','Exynos 5 Octa, Tegra K1','Paired with A7 for first big.LITTLE']},
+      a53:  {t:'Cortex-A53',  s:'Armv8-A · 2012 IP · 2014 ship',
+             b:['LITTLE successor to A7','In-order, 8-stage, dual-issue','AArch64 + AArch32','Replaced A7 everywhere','Still shipping in low-cost SoCs in 2024']},
+      a57:  {t:'Cortex-A57',  s:'Armv8-A · 2012 IP · 2014 ship',
+             b:['First big AArch64 core from Arm','3-wide OoO, 15-stage','Snapdragon 810 flagship','Paired with A53 in big.LITTLE','Beat to market by Apple A7 by 12 months']},
+      a72:  {t:'Cortex-A72',  s:'Armv8-A · 2015 ship',
+             b:['Major IPC jump over A57','3-wide OoO, 15-stage','Exynos 7420 variant, Kirin 950','Started the Austin flagship cadence','Also used in servers (eMAG, Graviton 1)']},
+      a76:  {t:'Cortex-A76',  s:'Armv8.2-A · 2018 ship',
+             b:['4-wide OoO, 13-stage','First "laptop-class" Cortex','Microsoft SQ1, Snapdragon 855','Basis of Neoverse N1 (the first Graviton 2)','A76AE adds bfloat16 + AutoMotive safety']},
+      a78:  {t:'Cortex-A78',  s:'Armv8.2-A · 2020 ship',
+             b:['4-wide OoO, 13-stage','Power-tuned refresh of A77','Snapdragon 888, Exynos 2100','Last Armv8-A flagship "A"-series','MTE + BTI optional']},
+      x1:   {t:'Cortex-X1',   s:'Armv8.2-A · 2020 ship',
+             b:['First Cortex-X "Custom Core"','5-wide decode, 8-wide issue','1 MB private L2','Snapdragon 888, Exynos 2100','Kicked off annual X / A split']},
+      a520: {t:'Cortex-A520', s:'Armv9.2-A · 2023 ship',
+             b:['LITTLE core, AArch64-only','Dual-core "complex" (shared L2 + FPU)','~10% IPC over A510, ~20% less energy','Snapdragon 8 Gen 3, Dimensity 9300','Current little in 1+3+4 configs']},
+      a725: {t:'Cortex-A725', s:'Armv9.2-A · 2024 ship',
+             b:['Middle core, 2024 "Chaberton" platform','~10% IPC over A720','AArch64-only across all ELs','Snapdragon 8 Elite, Dimensity 9400','SVE2, MTE, CCA support']},
+      x925: {t:'Cortex-X925', s:'Armv9.2-A · 2024 ship ("Blackhawk")',
+             b:['10-wide decode, huge BTB','~15% IPC over X4','Big L2 (up to 3 MB per core)','Dimensity 9400, Snapdragon 8 Elite','Current flagship — laptop-class IPC']}
+    };
+    function render(k){
+      const d=data[k]; const el=document.getElementById('ci');
+      el.innerHTML = '<div class="t">'+d.t+'</div><div class="s">'+d.s+'</div><ul>'+d.b.map(x=>'<li>'+x+'</li>').join('')+'</ul>';
+    }
+    document.querySelectorAll('#cp .btn').forEach(b=>{
+      b.addEventListener('click',()=>{ document.querySelectorAll('#cp .btn').forEach(x=>x.classList.remove('active')); b.classList.add('active'); render(b.dataset.k); });
+    });
+    render('a8');
+  </script>
+</section>
+
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr"><span class="tag">14</span><h2>Timeline — 2002 to 2024</h2></div>
+  <div class="tl">
+    <div class="yr">2002</div><div class="dot">●</div><div class="ev"><strong>ARM1136JF-S</strong> — first Armv6 with full MMU + TrustZone</div>
+    <div class="yr">2005</div><div class="dot">●</div><div class="ev hi"><strong>Cortex-A8</strong> announced — first Armv7-A, first NEON</div>
+    <div class="yr">2007</div><div class="dot">●</div><div class="ev"><strong>Cortex-A9 MPCore</strong> — first Arm OoO, first multi-core Cortex</div>
+    <div class="yr">2011</div><div class="dot">●</div><div class="ev hi"><strong>big.LITTLE</strong> — A15 + A7 paired via CCI-400</div>
+    <div class="yr">2012</div><div class="dot">●</div><div class="ev"><strong>Armv8-A</strong> announced (AArch64); Cortex-A53 / A57 IP released</div>
+    <div class="yr">2014</div><div class="dot">●</div><div class="ev">First Arm-IP Armv8 silicon ships (Exynos 5433, Snapdragon 810) — 12 months after Apple A7</div>
+    <div class="yr">2017</div><div class="dot">●</div><div class="ev hi"><strong>DynamIQ</strong> launched with Cortex-A75 / A55 — replaces big.LITTLE</div>
+    <div class="yr">2018</div><div class="dot">●</div><div class="ev"><strong>Cortex-A76</strong> — first "laptop-class" Arm core; becomes Neoverse N1</div>
+    <div class="yr">2020</div><div class="dot">●</div><div class="ev"><strong>Cortex-X1</strong> — first Custom-Core deliverable</div>
+    <div class="yr">2021</div><div class="dot">●</div><div class="ev hi"><strong>Armv9-A</strong> announced; Cortex-X2 / A710 / A510 — SVE2 + CCA mandatory</div>
+    <div class="yr">2023</div><div class="dot">●</div><div class="ev"><strong>Cortex-A520</strong> drops AArch32 at all ELs — 32-bit Android apps must migrate</div>
+    <div class="yr">2024</div><div class="dot">●</div><div class="ev hi"><strong>Cortex-X925 &quot;Blackhawk&quot;</strong> — 10-wide decode, new 3-digit naming</div>
+  </div>
+</section>
+
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr"><span class="tag">15</span><h2>Fujitsu A64FX &amp; Apple Silicon — the Outliers</h2></div>
+  <div class="cols cols-2">
+    <div>
+      <div class="card purple">
+        <h3 class="p">Fujitsu A64FX (2019)</h3>
+        <p>Custom Armv8.2-A + first-ever <strong>SVE</strong> implementation (512-bit fixed width). Powers the <strong>Fugaku</strong> supercomputer — #1 on Top500 in 2020-21. Not a Cortex-A, but it proved SVE at scale and convinced Arm to make SVE2 mandatory in v9-A.</p>
+      </div>
+      <div class="card blue" style="margin-top:0.4em;">
+        <h3 class="b">Apple Silicon (2013-)</h3>
+        <p>Cyclone (A7) → Typhoon (A8) → ... → Thunder / Everest (A17 Pro) → A18 Pro (2024). 8+ wide decode from day one; Apple took out an <strong>Architectural Licence</strong>, not a Cortex IP licence. All Apple cores implement the Armv8-A / v9-A ISA but <em>not a single line of Arm Cortex RTL.</em></p>
+      </div>
+    </div>
+    <div>
+      <ul>
+        <li>The ISA-licence model is how <strong>Apple, Qualcomm Nuvia/Oryon, Ampere Altra/One, and NVIDIA Grace</strong> all exist — Cortex-X is for customers who <em>don't</em> want to build a CPU from scratch.</li>
+        <li>A64FX showed the server world that Arm could do HPC; Apple showed the phone world that Arm could do laptop-class perf. Both motivated the modern Cortex-X + Neoverse investment.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr"><span class="tag">16</span><h2>Lessons for the Interview</h2></div>
+  <div class="cols cols-2">
+    <div>
+      <ul>
+        <li><strong class="a">"Why split Cortex-A and Cortex-X?"</strong> → annual flagship cadence, but A is constrained by mid-range power/area; X is Arm's "go big" sibling at premium SoC die budget.</li>
+        <li><strong class="a">"Why did AArch64 matter for phones?"</strong> → not address space — <em>31 × 64-bit registers</em> cut compiler spills ~30%, plus a properly specified memory model.</li>
+        <li><strong class="a">"What killed big.LITTLE?"</strong> → rigid two-cluster layout. DynamIQ's single-cluster + shared L3 + 1+3+4 layout is strictly better for modern phones.</li>
+        <li><strong class="a">"Why is Apple ahead?"</strong> → architectural licence + 8+ wide decode from 2013. Arm only matched that in X4/X925.</li>
+      </ul>
+    </div>
+    <div>
+      <ul>
+        <li><strong class="g">"Is AArch32 dead?"</strong> → in flagship cores, yes (v9-A strips it). In low-cost A53/A35 still alive. Android 32-bit app support ends with Armv9-A flagships.</li>
+        <li><strong class="g">"Why does Arm ship middle cores?"</strong> → the A720/A725 &quot;middle&quot; tier is for day-to-day sustained loads that would thermally throttle an X-core but are too heavy for A520. Modern phones average on middle cores for ~60% of workload time.</li>
+        <li><strong class="g">"Neoverse vs Cortex-A?"</strong> → Neoverse N1 was literally a re-characterised A76. Neoverse is Cortex-A ported into a CMN mesh fabric with server-grade features (MPAM, RAS, SBSA).</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr"><span class="tag">17</span><h2>Cortex-A Roadmap — Where It's Going</h2></div>
+  <div class="cols cols-2">
+    <div>
+      <ul>
+        <li><strong class="a">AArch64-only everywhere</strong>: by ~2026 every shipping Cortex-A from Arm will be AArch64-only. Armv8-A AArch32 entry is a legacy feature.</li>
+        <li><strong class="a">SME (Scalable Matrix Extension)</strong>: Armv9.2-A+. Streaming-mode matrix/tile instructions — converges with Apple AMX. Expected in Cortex-X next-gen.</li>
+        <li><strong class="a">Confidential Compute (CCA)</strong>: currently "server-oriented" but will land in mobile for protected-media and on-device AI by 2026.</li>
+        <li><strong class="a">Android laptops &amp; Windows-on-Arm</strong>: Cortex-X925 class IP targets 15-30W power envelopes — the old laptop MacBook Air zone.</li>
+      </ul>
+    </div>
+    <div>
+      <div class="card amber">
+        <h3>The automotive A-class push</h3>
+        <p>Arm's <strong>AE</strong> variants (A76AE, A78AE) add ASIL-B/D safety (split-lock cores, parity, ECC). The next Cortex-AE tier is the revenue-growth story alongside Neoverse in Arm's post-2023 IPO strategy.</p>
+      </div>
+      <div class="card blue" style="margin-top:0.4em;">
+        <h3 class="b">Arm's 2025 challenge</h3>
+        <p>Apple Silicon keeps widening the decode. Arm's X925 just caught up to Apple M1-era. The race for sustained &gt;10 IPC at &lt;5 W is what the next five years of Cortex-X is about.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr"><span class="tag">18</span><h2>References</h2></div>
+  <div style="max-width:90%;margin:0 auto;font-size:0.58em;line-height:1.8;">
+    <p>
+      <strong class="a">Arm Ltd.</strong> — <em>Arm Architecture Reference Manual (A-profile)</em> — DDI 0487, freely downloadable<br>
+      <strong class="a">Arm Ltd.</strong> — Cortex-A core Technical Reference Manuals (one per core, publicly available on developer.arm.com)<br>
+      <strong class="a">Arm Community Blog</strong> — annual &quot;Introducing Cortex-X&quot; / &quot;Introducing Cortex-A&quot; announcement posts (2020-2024)<br>
+      <strong class="a">WikiChip</strong> — wikichip.org/wiki/arm_holdings/microarchitectures — maintained microarchitecture summaries with die photos<br>
+      <strong class="a">AnandTech</strong> — Andrei Frumusanu's deep-dive reviews of every Cortex-A / X generation from A72 onwards (2015-2023 archive)<br>
+      <strong class="a">Joseph Yiu</strong> — <em>System-on-Chip Design with Arm Cortex-M Processors</em> — sibling volume; A-profile coverage in the Arm architecture chapters<br>
+      <strong class="a">David Seal</strong> — <em>ARM Architecture Reference Manual</em>, 2nd ed. (Addison-Wesley) — classic reference, covers through Armv5<br>
+      <strong class="a">Arm IPO prospectus (2023)</strong> — shipment splits, licensee counts, A-profile royalty share<br>
+      <strong class="a">Hot Chips / ISSCC</strong> — annual microarchitecture talks (A76, A77, X1, X4, Neoverse N1/V1)
+    </p>
+    <p style="color:var(--muted);margin-top:0.8em;font-size:0.85em">
+      Presentation built with <a href="https://revealjs.com">Reveal.js 4.6</a> · Playfair Display + DM Sans + JetBrains Mono<br>
+      Educational use.
+    </p>
+  </div>
+</section>
+
+</div></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/reveal.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/plugin/highlight/highlight.min.js"></script>
+<script>
+Reveal.initialize({ hash: true, slideNumber: 'c/t', transition: 'fade', transitionSpeed: 'fast', controls: true, progress: true, center: false, width: 1100, height: 900, margin: 0.01, plugins: [RevealHighlight], highlight: { theme: 'monokai' } });
+</script>
+<script>
+(function(){ var h = Reveal.getConfig().height || 900; var m = Reveal.getConfig().margin || 0.02; var maxH = Math.floor(h * (1 - 2 * m)) + 'px'; function fixSlides(){ document.querySelectorAll('.reveal .slides>section,.reveal .slides>section>section').forEach(function(s){ s.style.display = 'block'; s.style.maxHeight = maxH; }); } Reveal.on('ready', fixSlides); Reveal.on('slidechanged', fixSlides); })();
+</script>
+</body>
+</html>

@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Armv8-A / Armv9-A Architecture</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@400;500;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/reveal.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/theme/black.min.css">
+<style>
+  :root {
+    --amber:#f5a623;--green:#4ecb8d;--purple:#a78bfa;--blue:#60a5fa;--red:#f87171;
+    --bg:#0a0a0f;--bg2:#10101a;--bg3:#181824;--border:#2a2a3a;--text:#e8e8f0;--muted:#8888a8;
+  }
+  .reveal-viewport { background: var(--bg); }
+  .reveal .slides section { background: transparent; }
+  .reveal section { text-align: left; }
+  .reveal .slides > section { padding: 0.5em; overflow-y: auto !important; align-items: flex-start !important; justify-content: flex-start !important; }
+  .reveal .progress { color: var(--amber); height: 3px; }
+  .reveal .controls { color: var(--amber); }
+  .reveal section::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, var(--amber), var(--green)); }
+  .reveal { font-family: 'DM Sans', sans-serif; color: var(--text); font-size: 22px; }
+  .reveal .slide-number { font-family: 'JetBrains Mono', monospace; font-size: 0.7em; color: var(--muted); }
+  .reveal h1, .reveal h2, .reveal h3 { font-family: 'Playfair Display', serif; color: #fff; text-transform: none; letter-spacing: -0.01em; }
+  .reveal h1 { font-size: 2.4em; font-weight: 900; color: var(--amber); line-height: 1.1; }
+  .reveal h2 { font-size: 1.7em; font-weight: 700; color: var(--amber); margin-bottom: 0.6em; }
+  .reveal h3 { font-size: 1.2em; font-weight: 700; color: var(--green); margin-bottom: 0.3em; }
+  .reveal p  { font-size: 0.75em; line-height: 1.5; color: var(--text); }
+  .reveal li { font-size: 0.7em; line-height: 1.5; margin-bottom: 0.25em; }
+  .reveal code { font-family: 'JetBrains Mono', monospace; font-size: .72em; }
+  .reveal pre  { background: var(--bg3); border: 1px solid var(--border); border-radius: 8px; padding: 0.5em 1em; margin: 0.4em 0; width: 100%; box-shadow: none; }
+  .reveal pre code { font-size: 0.58em; line-height: 1.5; background: transparent; color: #cdd6f4; }
+  .slide-hdr { display: flex; align-items: center; gap: .4em; border-bottom: 1px solid var(--border); padding-bottom: .2em; margin-bottom: .3em; }
+  .slide-hdr .tag { font-family: 'JetBrains Mono', monospace; font-size: 0.55em; font-weight: 600; color: var(--bg); background: var(--amber); padding: .1em .4em; border-radius: 3px; letter-spacing: .04em; }
+  .slide-hdr h2 { margin: 0; font-size: 1.4em; }
+  .cols{display:grid;gap:1em;} .cols-2{grid-template-columns:1fr 1fr;} .cols-3{grid-template-columns:1fr 1fr 1fr;} .cols-6040{grid-template-columns:6fr 4fr;} .cols-4060{grid-template-columns:4fr 6fr;}
+  .card { background: var(--bg2); border: 1px solid var(--border); border-radius: 8px; padding: 1em 1.2em; box-shadow: 0 4px 20px rgba(0,0,0,0.3); margin: 0.4em 0; }
+  .card.amber { border-left: 3px solid var(--amber); } .card.green { border-left: 3px solid var(--green); } .card.purple{ border-left: 3px solid var(--purple); } .card.blue  { border-left: 3px solid var(--blue); } .card.red   { border-left: 3px solid var(--red); }
+  .card h3 { font-size: 1em; margin: 0 0 0.4em; }
+  .card p, .card ul  { font-size: 0.8em; margin: 0; color: #b8b8d0; } .card ul { padding-left: 1.2em; } .card li { font-size: 0.85em; margin-bottom: 0.25em; }
+  .reveal table { width: 100%; border-collapse: collapse; font-size: 0.65em; margin: 0.5em 0; }
+  .reveal table th { background: var(--bg3); color: var(--amber); padding: 0.5em 0.7em; border: 1px solid var(--border); text-align: left; font-weight: 700; }
+  .reveal table td { padding: 0.5em 0.7em; border: 1px solid var(--border); color: #ccc; vertical-align: top; }
+  .reveal table tr:nth-child(even) td { background: #0e0e18; }
+  .a{color:var(--amber);font-weight:600;} .g{color:var(--green);font-weight:600;} .p{color:var(--purple);font-weight:600;} .b{color:var(--blue);font-weight:600;} .r{color:var(--red);font-weight:600;} .mono{font-family:'JetBrains Mono',monospace;}
+  svg.diagram { display: block; margin: 0 auto; overflow: visible; }
+  .pill { display: inline-block; font-family: 'JetBrains Mono', monospace; font-size: 0.6em; padding: 0.15em 0.6em; border-radius: 999px; border: 1px solid; margin: 0 .08em; }
+  .pill.amber{color:var(--amber);border-color:var(--amber);} .pill.green{color:var(--green);border-color:var(--green);} .pill.purple{color:var(--purple);border-color:var(--purple);} .pill.blue{color:var(--blue);border-color:var(--blue);} .pill.red{color:var(--red);border-color:var(--red);}
+  .title-slide h1 { font-size: 2.4em; } .title-slide .subtitle { font-size: 0.85em; color: var(--green); font-weight: 400; letter-spacing: 0.06em; margin: 0.3em 0 0.6em; } .title-slide .meta { font-size: 0.6em; color: var(--muted); font-family: 'JetBrains Mono', monospace; }
+  .dim { color: var(--muted); } .small { font-size: 0.65em; } .smaller { font-size: 0.55em; } .tiny { font-size: 0.48em; }
+  .reveal ul, .reveal ol { margin: .15em 0 .15em 1em; }
+  .quote { font-style: italic; color: #ccc; padding: 0.5em 1em; border-left: 3px solid var(--blue); background: var(--bg2); border-radius: 4px; font-size: 0.8em; }
+  .quote cite { display: block; font-size: 0.72em; color: var(--muted); font-style: normal; margin-top: 0.4em; }
+
+  .el-picker { display: flex; gap: 6px; margin: 0.4em 0; font-family: 'JetBrains Mono', monospace; font-size: 0.65em; flex-wrap: wrap; }
+  .el-picker .btn { cursor: pointer; padding: 0.4em 0.9em; border: 1px solid var(--border); border-radius: 5px; background: var(--bg2); color: var(--text); transition: all 0.15s; }
+  .el-picker .btn:hover { border-color: var(--amber); color: var(--amber); }
+  .el-picker .btn.active { background: var(--amber); color: var(--bg); border-color: var(--amber); font-weight: 700; }
+  .el-info { background: var(--bg2); border: 1px solid var(--border); border-left: 3px solid var(--amber); border-radius: 6px; padding: 0.7em 1em; margin-top: 0.3em; font-size: 0.75em; min-height: 160px; }
+  .el-info .t { color: var(--amber); font-weight: 700; font-family: 'Playfair Display', serif; font-size: 1.15em; margin-bottom: 0.15em; }
+  .el-info .s { color: var(--green); font-family: 'JetBrains Mono', monospace; font-size: 0.82em; margin-bottom: 0.3em; }
+  .el-info ul { margin: 0.2em 0 0 1em; font-size: 0.9em; }
+</style>
+</head>
+<body>
+<div class="reveal">
+<div class="slides">
+
+<section class="title-slide" data-background-color="#0a0a0f">
+  <div style="font-family:'JetBrains Mono',monospace;font-size:.5em;color:var(--muted);margin-bottom:.4em;letter-spacing:.1em;">ARM CORTEX-A · PRESENTATION 02</div>
+  <h1>Armv8-A / Armv9-A Architecture</h1>
+  <div class="subtitle">Exception Levels · AArch64 · A64 ISA · System Registers · v8.x → v9.x Evolution</div>
+  <div style="width:60px;height:3px;background:var(--amber);margin-bottom:1.4em;"></div>
+  <div class="meta">EL0 · EL1 · EL2 · EL3 · AArch64 vs AArch32 · SPSR / ELR / VBAR · ESR · SCR / HCR</div>
+</section>
+
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr"><span class="tag">02</span><h2>What is an "Architecture Profile"?</h2></div>
+  <div class="cols cols-2">
+    <div>
+      <ul>
+        <li>The Arm ISA is defined in one massive document — the <strong>Arm Architecture Reference Manual</strong> (ARM ARM, DDI 0487, ~9000 pages).</li>
+        <li>It splits by <strong>profile</strong>:
+          <ul>
+            <li><span class="a">A-profile</span> — application; full MMU, four ELs, virtualization.</li>
+            <li><span class="a">R-profile</span> — real-time; MPU, deterministic.</li>
+            <li><span class="a">M-profile</span> — microcontroller; no AArch64, NVIC.</li>
+          </ul>
+        </li>
+        <li>This deck covers the <strong>A-profile</strong>: Armv8-A (2011 spec, 2014 silicon) and its "v9" rebrand (2021).</li>
+      </ul>
+    </div>
+    <div>
+      <div class="card amber">
+        <h3>Armv8-A — the clean break</h3>
+        <p>Armv8-A introduced a <strong>second execution state</strong>, <span class="mono">AArch64</span>, with a completely new instruction set (<span class="mono">A64</span>), new exception model, new register file. AArch32 was kept for backwards compatibility but is being deprecated piece-by-piece.</p>
+      </div>
+      <div class="card blue" style="margin-top:0.4em;">
+        <h3 class="b">v9-A is v8.5-A-plus</h3>
+        <p>Same profile, same execution states — but mandates SVE2, MTE, and adds RME / CCA. Semantically an extension, marketed as a new major.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr"><span class="tag">03</span><h2>AArch64 vs AArch32 — Two Execution States</h2></div>
+  <table>
+    <tr><th>Aspect</th><th>AArch64</th><th>AArch32</th></tr>
+    <tr><td>Register file</td><td>31 × 64-bit GPRs (<span class="mono">X0–X30</span>) + XZR + SP + PC</td><td>16 × 32-bit (R0–R12, SP, LR, PC) + banked per mode</td></tr>
+    <tr><td>Instruction encoding</td><td>Fixed 32-bit (<span class="mono">A64</span>)</td><td>Mixed 16/32-bit (Thumb-2) + 32-bit Arm</td></tr>
+    <tr><td>Condition codes</td><td>Select instructions only (<span class="mono">CSEL/CSINC</span>). No universal CCs.</td><td>Almost every instruction conditional</td></tr>
+    <tr><td>SIMD / FP</td><td>32 × 128-bit <span class="mono">V0–V31</span> (NEON + FP unified)</td><td>32 × 64-bit <span class="mono">D0–D31</span> (VFPv4/NEON overlay)</td></tr>
+    <tr><td>Exception entry</td><td>To fixed EL; <span class="mono">ELR_ELx</span> / <span class="mono">SPSR_ELx</span></td><td>To privileged mode; banked <span class="mono">SP_usr/svc/irq</span> etc.</td></tr>
+    <tr><td>Memory model</td><td>Weak, with explicit <span class="mono">LDAR / STLR</span> + LSE atomics</td><td>Weak; no LSE (Armv8.1 LSE is AArch64-only)</td></tr>
+    <tr><td>Status in 2025</td><td>Universal flagship state</td><td>Removed from X2+, A520+ at EL1-EL3; still allowed at EL0 on some cores</td></tr>
+  </table>
+  <p class="small" style="margin-top:0.4em;">A PE (Processing Element) selects execution state <strong>per Exception Level</strong> — e.g. EL1 running AArch64 can still have EL0 running AArch32 user-mode apps on cores that allow it.</p>
+</section>
+
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr"><span class="tag">04</span><h2>The Four Exception Levels</h2></div>
+  <div class="cols cols-2">
+    <div>
+      <svg viewBox="0 0 340 280" style="width:100%;">
+        <rect x="10" y="10" width="320" height="260" rx="10" fill="#10101a" stroke="#f5a623"/>
+        <!-- EL0 -->
+        <rect x="30" y="30" width="280" height="50" rx="5" fill="#1f3a1f" stroke="#4ecb8d"/>
+        <text x="170" y="50" text-anchor="middle" fill="#4ecb8d" font-family="JetBrains Mono" font-size="11" font-weight="700">EL0 — Unprivileged (user)</text>
+        <text x="170" y="68" text-anchor="middle" fill="#cdd6f4" font-family="JetBrains Mono" font-size="9">Applications (userspace)</text>
+        <!-- EL1 -->
+        <rect x="30" y="90" width="280" height="50" rx="5" fill="#1a2540" stroke="#60a5fa"/>
+        <text x="170" y="110" text-anchor="middle" fill="#60a5fa" font-family="JetBrains Mono" font-size="11" font-weight="700">EL1 — OS kernel</text>
+        <text x="170" y="128" text-anchor="middle" fill="#cdd6f4" font-family="JetBrains Mono" font-size="9">Linux / Windows / XNU kernel</text>
+        <!-- EL2 -->
+        <rect x="30" y="150" width="280" height="50" rx="5" fill="#2a1a2a" stroke="#a78bfa"/>
+        <text x="170" y="170" text-anchor="middle" fill="#a78bfa" font-family="JetBrains Mono" font-size="11" font-weight="700">EL2 — Hypervisor</text>
+        <text x="170" y="188" text-anchor="middle" fill="#cdd6f4" font-family="JetBrains Mono" font-size="9">KVM, Xen, Hyper-V, pKVM (Android)</text>
+        <!-- EL3 -->
+        <rect x="30" y="210" width="280" height="50" rx="5" fill="#2a1a0a" stroke="#f5a623"/>
+        <text x="170" y="230" text-anchor="middle" fill="#f5a623" font-family="JetBrains Mono" font-size="11" font-weight="700">EL3 — Secure Monitor</text>
+        <text x="170" y="248" text-anchor="middle" fill="#cdd6f4" font-family="JetBrains Mono" font-size="9">TF-A (Trusted Firmware-A) · SMC handler</text>
+      </svg>
+    </div>
+    <div>
+      <ul>
+        <li><strong class="g">EL0</strong> — user mode. Can execute only unprivileged instructions. Traps to EL1 on syscall (<span class="mono">SVC</span>).</li>
+        <li><strong class="b">EL1</strong> — OS. Full MMU control (<span class="mono">TTBR0/1_EL1</span>, <span class="mono">SCTLR_EL1</span>). Traps to EL2 via <span class="mono">HVC</span>.</li>
+        <li><strong class="p">EL2</strong> — hypervisor. Stage-2 translation. <span class="mono">VTTBR_EL2</span>, <span class="mono">HCR_EL2</span>. <strong>VHE</strong> (Armv8.1-A) lets Linux run directly in EL2.</li>
+        <li><strong class="a">EL3</strong> — secure monitor + world switch. Only level that can change <span class="mono">SCR_EL3.NS</span> (Non-secure bit). Runs TF-A or equivalent.</li>
+        <li>Higher EL = more privilege. Exception return via <span class="mono">ERET</span> uses <span class="mono">ELR_ELx / SPSR_ELx</span>.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr"><span class="tag">05</span><h2>Exception Entry &amp; Return</h2></div>
+  <div class="cols cols-2">
+    <div>
+      <ul>
+        <li>Exceptions take the PE from a lower EL to a higher EL (or same EL). They <strong>cannot</strong> lower privilege.</li>
+        <li>On entry, hardware writes:
+          <ul>
+            <li><span class="mono">ELR_ELx</span> ← preferred return address</li>
+            <li><span class="mono">SPSR_ELx</span> ← saved PSTATE (NZCV + D,A,I,F + EL + nRW)</li>
+            <li><span class="mono">ESR_ELx</span> ← exception syndrome (class + IL + ISS)</li>
+            <li><span class="mono">FAR_ELx</span> ← faulting virtual address (if relevant)</li>
+          </ul>
+        </li>
+        <li>PC jumps to <span class="mono">VBAR_ELx + offset</span>. Offsets are fixed (0x000, 0x080, 0x100, 0x180 × same-EL / lower-EL × sync/IRQ/FIQ/SError).</li>
+        <li>Return: <span class="mono">ERET</span> restores PC from ELR and PSTATE from SPSR.</li>
+      </ul>
+    </div>
+    <div>
+      <div class="card amber">
+        <h3>The 16-entry vector table</h3>
+        <p>VBAR points to a 2 KB-aligned table with 16 × 128-byte vectors — 4 exception types × (current EL with SP0 / current EL with SPx / lower EL AArch64 / lower EL AArch32). Each vector is up to 32 instructions.</p>
+      </div>
+      <div class="card blue" style="margin-top:0.4em;">
+        <h3 class="b">ESR — the syndrome register</h3>
+        <p><span class="mono">ESR_ELx.EC</span> (bits 31:26) gives the <strong>exception class</strong> (26 defined): data abort, instruction abort, SVC, HVC, SMC, illegal state, PAC failure, SVE access, MTE tag check, etc. Linux decodes this to dispatch.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr"><span class="tag">06</span><h2>A64 — The 64-bit Instruction Set</h2></div>
+  <div class="cols cols-2">
+    <div>
+      <ul>
+        <li><strong>Fixed 32-bit encoding.</strong> No Thumb, no mixed length. Every instruction is 4 bytes.</li>
+        <li>31 × 64-bit general registers <span class="mono">X0–X30</span>; access as 32-bit via <span class="mono">W0–W30</span>.</li>
+        <li>Register 31 is context-dependent: either the <strong>Zero Register</strong> (<span class="mono">XZR/WZR</span>) or the <strong>Stack Pointer</strong> (<span class="mono">SP</span>).</li>
+        <li>PC is <strong>not</strong> a general register (lesson learned from Armv7). Only reachable via branch + <span class="mono">ADR/ADRP</span> PC-relative generation.</li>
+        <li>Instructions are grouped by top bits — branch, load/store, data-processing-immediate, data-processing-register, SIMD/FP, system.</li>
+      </ul>
+    </div>
+    <div>
+      <pre><code class="nohighlight">// Canonical A64 function prologue
+stp  x29, x30, [sp, #-16]!   // push FP,LR
+mov  x29, sp                 // set FP
+
+// LDAR / STLR — release consistency
+ldar  w0, [x1]               // acquire-load
+stlr  w2, [x3]               // release-store
+
+// LSE atomics (Armv8.1-A) — ACE scalability
+cas   w4, w5, [x6]           // CAS, acquire+release
+ldadd w7, w8, [x9]           // atomic add, return old
+
+// PC-relative addressing
+adrp  x0, sym                // 4 KB-page PC-rel
+add   x0, x0, :lo12:sym      // page offset
+
+// ERET — return from exception
+eret                         // ELR_ELx -> PC, SPSR -> PSTATE
+</code></pre>
+    </div>
+  </div>
+</section>
+
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr"><span class="tag">07</span><h2>PSTATE — The Processor State</h2></div>
+  <div class="cols cols-2">
+    <div>
+      <ul>
+        <li>AArch64 replaces CPSR with <strong>PSTATE</strong> — a logical collection of fields, not a single register.</li>
+        <li>Core fields:
+          <ul>
+            <li><span class="a">NZCV</span> — condition flags (Negative, Zero, Carry, Overflow). Read via <span class="mono">MRS x0, NZCV</span>.</li>
+            <li><span class="a">DAIF</span> — interrupt masks (Debug, SError, IRQ, FIQ).</li>
+            <li><span class="a">EL[1:0]</span> — current Exception Level.</li>
+            <li><span class="a">SP</span> — 0 ⇒ SP_EL0, 1 ⇒ SP_ELx.</li>
+            <li><span class="a">nRW</span> — 0 ⇒ AArch64, 1 ⇒ AArch32.</li>
+          </ul>
+        </li>
+        <li>Armv8.5-A adds <span class="mono">SSBS</span> (Speculative Store Bypass Safe) and <span class="mono">PAN</span> (Privileged Access Never) to PSTATE.</li>
+      </ul>
+    </div>
+    <div>
+      <div class="card green">
+        <h3 class="g">SPSR is snapshot of PSTATE</h3>
+        <p>On exception entry, the full PSTATE is packed into <span class="mono">SPSR_ELx</span> bits (N=31, Z=30, C=29, V=28, D=9, A=8, I=7, F=6, M[3:0]=EL+SP). <span class="mono">ERET</span> unpacks it back.</p>
+      </div>
+      <div class="card red" style="margin-top:0.4em;">
+        <h3 class="r">PAN — the bug-killer</h3>
+        <p>PSTATE.PAN=1 makes EL1/2 data accesses to EL0-accessible memory <strong>fault</strong>. Defeats a whole class of kernel bugs where kernel accidentally dereferences user pointer. Armv8.1.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr"><span class="tag">08</span><h2>Key System Registers</h2></div>
+  <table>
+    <tr><th>Register</th><th>Purpose</th><th>Role</th></tr>
+    <tr><td><span class="mono">SCTLR_ELx</span></td><td>System Control</td><td>MMU enable (M), caches (C, I), WXN, endianness</td></tr>
+    <tr><td><span class="mono">TTBR0_ELx / TTBR1_ELx</span></td><td>Translation Table Base</td><td>Low-half / high-half VA → page-table roots</td></tr>
+    <tr><td><span class="mono">TCR_ELx</span></td><td>Translation Control</td><td>Granule size, VA size, PA size, ASID width</td></tr>
+    <tr><td><span class="mono">MAIR_ELx</span></td><td>Memory Attribute Indirection</td><td>8 × 8-bit memory-type indices used in PTEs</td></tr>
+    <tr><td><span class="mono">VBAR_ELx</span></td><td>Vector Base Address</td><td>Base of the exception vector table (2 KB aligned)</td></tr>
+    <tr><td><span class="mono">ESR_ELx</span></td><td>Exception Syndrome</td><td>Written on exception entry (EC + ISS)</td></tr>
+    <tr><td><span class="mono">ELR_ELx / SPSR_ELx</span></td><td>Saved return context</td><td>Return PC + saved PSTATE</td></tr>
+    <tr><td><span class="mono">SCR_EL3</span></td><td>Secure Configuration</td><td>NS bit (world select), IRQ/FIQ route</td></tr>
+    <tr><td><span class="mono">HCR_EL2</span></td><td>Hypervisor Configuration</td><td>VM trap configuration, stage-2 enable</td></tr>
+    <tr><td><span class="mono">MPIDR_EL1</span></td><td>Multi-PE ID</td><td>Affinity levels Aff0..Aff3 — identifies core in cluster</td></tr>
+    <tr><td><span class="mono">ID_AA64*_EL1</span></td><td>Feature ID</td><td>Dozens of read-only registers — what features are implemented</td></tr>
+  </table>
+</section>
+
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr"><span class="tag">09</span><h2>Synchronous vs Asynchronous Exceptions</h2></div>
+  <div class="cols cols-2">
+    <div>
+      <h3>Synchronous</h3>
+      <ul>
+        <li>Directly caused by an executing instruction. Precise.</li>
+        <li>SVC (EL0→EL1 syscall), HVC (EL1→EL2), SMC (EL1/2→EL3).</li>
+        <li>Data/instruction aborts (MMU faults, permission violations).</li>
+        <li>Illegal execution state, illegal PSTATE, PAC auth failure.</li>
+        <li>MTE synchronous tag check fault (if configured).</li>
+      </ul>
+    </div>
+    <div>
+      <h3>Asynchronous</h3>
+      <ul>
+        <li>External event, not caused by any particular instruction.</li>
+        <li><strong class="a">IRQ</strong> — maskable external interrupt (via GIC).</li>
+        <li><strong class="a">FIQ</strong> — higher-priority interrupt (historically "fast"; in AArch64 signalled separately from IRQ).</li>
+        <li><strong class="r">SError</strong> — SError (System Error) — catastrophic bus error / RAS event. Routed per <span class="mono">HCR_EL2.AMO / SCR_EL3.EA</span>.</li>
+        <li>Masked by PSTATE.<span class="mono">DAIF</span> bits.</li>
+      </ul>
+    </div>
+  </div>
+  <div class="card amber" style="margin-top:0.6em;">
+    <p>The vector offset within a 2 KB table encodes both <em>origin</em> (same-EL vs lower-EL) and <em>type</em> (synchronous / IRQ / FIQ / SError) — so the CPU only needs <strong>one</strong> base register (<span class="mono">VBAR_ELx</span>) to dispatch to 16 distinct handlers.</p>
+  </div>
+</section>
+
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr"><span class="tag">10</span><h2>Interactive — Explore Each Exception Level</h2></div>
+  <div class="el-picker" id="elp">
+    <div class="btn active" data-k="el0">EL0 — User</div>
+    <div class="btn" data-k="el1">EL1 — OS</div>
+    <div class="btn" data-k="el2">EL2 — Hypervisor</div>
+    <div class="btn" data-k="el3">EL3 — Secure Monitor</div>
+  </div>
+  <div class="el-info" id="eli"></div>
+  <script>
+    const eld = {
+      el0: {t:'EL0 — Unprivileged (user)', s:'Userspace — no MMU control, no system registers',
+            b:['Can execute all non-privileged instructions','Syscall via SVC → traps to EL1','Cannot write SCTLR, TTBR, VBAR, ELR, SPSR','Reads MPIDR, cache ops restricted','SVE + NEON available if enabled by EL1','MTE tag checks performed here','This is where Android apps, Linux binaries, user-space daemons live']},
+      el1: {t:'EL1 — OS kernel', s:'Owns the Stage-1 page tables and most system registers',
+            b:['Linux kernel, Windows NT kernel, XNU kernel run here','Writes TTBR0_EL1 / TTBR1_EL1 / SCTLR_EL1 / MAIR_EL1','Handles SVC exceptions from EL0','HVC traps to EL2 if a hypervisor is present','DAIF mask controls IRQ / FIQ','Controls MTE TCF bits per process via TCR_EL1.TCMA / TBID']},
+      el2: {t:'EL2 — Hypervisor', s:'Stage-2 translation: guest-physical → host-physical',
+            b:['KVM / Xen / Hyper-V / pKVM / Gunyah','HCR_EL2 traps guest accesses to config registers','VTTBR_EL2 holds stage-2 page-table root','VMID tags TLB entries for fast context-switch','VHE (Armv8.1) lets Linux run directly in EL2 — no split hypervisor','Realms run "guests" in EL1 of the Realm world (RME)']},
+      el3: {t:'EL3 — Secure Monitor', s:'World switch — only EL that can change SCR_EL3.NS',
+            b:['Trusted Firmware-A (TF-A) is the canonical EL3 workload','Handles SMC (Secure Monitor Call) from EL1/EL2','Can route IRQ/FIQ to any world via SCR_EL3 bits','Controls transitions between Secure / Non-secure / Realm / Root worlds','Initialises MMU, GIC, SMMU before handing off to EL2/1','Typically tiny (< 100 KB text) — the root of trust']}
+    };
+    function renderEl(k){
+      const d = eld[k];
+      document.getElementById('eli').innerHTML =
+        '<div class="t">'+d.t+'</div><div class="s">'+d.s+'</div><ul>'+d.b.map(x=>'<li>'+x+'</li>').join('')+'</ul>';
+    }
+    document.querySelectorAll('#elp .btn').forEach(b=>{
+      b.addEventListener('click',()=>{ document.querySelectorAll('#elp .btn').forEach(x=>x.classList.remove('active')); b.classList.add('active'); renderEl(b.dataset.k); });
+    });
+    renderEl('el0');
+  </script>
+</section>
+
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr"><span class="tag">11</span><h2>Armv8.x Evolution — Where the Features Landed</h2></div>
+  <table>
+    <tr><th>Version</th><th>Year</th><th>Feature highlights</th></tr>
+    <tr><td><span class="a">Armv8.0-A</span></td><td>2011</td><td>Baseline: AArch64, A64, NEON 128-bit, Crypto (AES/SHA) optional</td></tr>
+    <tr><td><span class="a">Armv8.1-A</span></td><td>2014</td><td>LSE atomics, VHE, PAN, RAS, vCPU IDs, AP alternate path</td></tr>
+    <tr><td><span class="a">Armv8.2-A</span></td><td>2016</td><td>Optional SVE, FP16, dot-product (UDOT/SDOT), PAN improvements, bfloat16 (later)</td></tr>
+    <tr><td><span class="a">Armv8.3-A</span></td><td>2017</td><td>Pointer Authentication (PAC), Nested Virtualization, JSCVT, RCpc loads</td></tr>
+    <tr><td><span class="a">Armv8.4-A</span></td><td>2018</td><td>Secure EL2, MPAM, Activity Monitors (AMU), crypto refresh</td></tr>
+    <tr><td><span class="a">Armv8.5-A</span></td><td>2019</td><td>MTE, BTI, SSBS, Random Number instructions (RNDR)</td></tr>
+    <tr><td><span class="a">Armv8.6-A</span></td><td>2020</td><td>bfloat16 mandatory, Matmul Int8 (i8mm), Enhanced counter virtualization</td></tr>
+    <tr><td><span class="a">Armv8.7-A</span></td><td>2021</td><td>WFET / WFIT (timed wait), LD64B / ST64B block ops, PCIe accelerator hints</td></tr>
+    <tr><td><span class="g">Armv9.0-A</span></td><td>2021</td><td>= v8.5 + mandatory SVE2 + RME/CCA + TRBE/BRBE</td></tr>
+    <tr><td><span class="g">Armv9.2-A</span></td><td>2023</td><td>SME (Scalable Matrix), MPAM v1 refinements</td></tr>
+  </table>
+</section>
+
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr"><span class="tag">12</span><h2>AArch64 Calling Convention (AAPCS64)</h2></div>
+  <div class="cols cols-2">
+    <div>
+      <ul>
+        <li><strong class="a">X0–X7</strong> — argument + return registers. Up to 8 integer args passed in registers.</li>
+        <li><strong class="a">X8</strong> — indirect result register (struct return pointer), or syscall number in Linux.</li>
+        <li><strong class="a">X9–X15</strong> — caller-saved temporaries.</li>
+        <li><strong class="a">X16 / X17</strong> — IP0 / IP1 — intra-procedure-call scratch (for PLT thunks).</li>
+        <li><strong class="a">X18</strong> — platform register (TLS on macOS/iOS, reserved on Linux).</li>
+        <li><strong class="a">X19–X28</strong> — callee-saved.</li>
+        <li><strong class="a">X29 (FP)</strong> — frame pointer.</li>
+        <li><strong class="a">X30 (LR)</strong> — link register.</li>
+        <li><strong class="a">SP</strong> — 16-byte aligned at public function entry/exit.</li>
+      </ul>
+    </div>
+    <div>
+      <pre><code class="nohighlight">// add_two(int a, int b) — trivial example
+
+add_two:
+    add   w0, w0, w1         // w0 = a + b
+    ret                      // branch to LR
+
+// function that calls another
+caller:
+    stp   x29, x30, [sp,#-32]! // push FP, LR
+    mov   x29, sp             // set up FP
+    mov   w0, #42             // arg0
+    mov   w1, #7              // arg1
+    bl    add_two             // call
+    // result in w0
+    ldp   x29, x30, [sp],#32  // pop FP, LR
+    ret
+</code></pre>
+      <p class="small dim" style="margin-top:0.3em;">Note: <span class="mono">stp/ldp</span> pair-ops (load/store pair) are idiomatic in A64 — 2× density vs AArch32's push/pop.</p>
+    </div>
+  </div>
+</section>
+
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr"><span class="tag">13</span><h2>WFI / WFE — Low-Power Hints</h2></div>
+  <div class="cols cols-2">
+    <div>
+      <ul>
+        <li><strong class="a">WFI</strong> — Wait For Interrupt. Core enters a low-power state until any pending asynchronous exception or debug event.</li>
+        <li><strong class="a">WFE</strong> — Wait For Event. Enters low-power state until an <em>event</em> fires: <span class="mono">SEV</span> / <span class="mono">SEVL</span>, GIC wake-up request, STXR failure (lock contention), timer event.</li>
+        <li>WFE is the cornerstone of spinlocks on AArch64 — spin loops do <span class="mono">LDAXR / STXR / CBNZ → WFE</span> so the hardware can park the core until the lock changes.</li>
+        <li>Armv8.7-A added <strong>WFIT / WFET</strong> — Wait-For-Interrupt/Event with timeout. Avoids the OS having to arm an extra timer to bound sleep.</li>
+      </ul>
+    </div>
+    <div>
+      <pre><code class="nohighlight">// Spin-lock using WFE (idiomatic AArch64)
+acquire:
+  prfm  pstl1keep, [x0]
+1:
+  ldaxr w1, [x0]      // acquire-load lock word
+  cbnz  w1, wait      // if held, WFE
+  stxr  w1, w2, [x0]  // try to take (w2=1)
+  cbnz  w1, 1b        // retry if stxr failed
+  ret
+wait:
+  wfe                 // park core until SEV
+  b     1b
+
+release:
+  stlr  wzr, [x0]     // release-store clears it
+  sev                 // wake any waiters
+  ret
+</code></pre>
+    </div>
+  </div>
+</section>
+
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr"><span class="tag">14</span><h2>A-profile vs M-profile — Why They Look Different</h2></div>
+  <table>
+    <tr><th>Aspect</th><th>Cortex-A (A-profile)</th><th>Cortex-M (M-profile)</th></tr>
+    <tr><td>Execution states</td><td>AArch64 + AArch32</td><td>Thumb-only (no AArch64)</td></tr>
+    <tr><td>Privilege model</td><td>4 Exception Levels (EL0-EL3)</td><td>2 (Handler / Thread, × Priv/Unpriv)</td></tr>
+    <tr><td>Memory management</td><td>Full MMU (VMSAv8) — paged, TLB</td><td>MPU — region-based, no translation</td></tr>
+    <tr><td>Interrupt controller</td><td>GIC (architectural, separate IP)</td><td>NVIC (part of the CPU itself)</td></tr>
+    <tr><td>Exception latency</td><td>Dozens of cycles, OS-mediated</td><td>Deterministic, 12 cycles, HW push</td></tr>
+    <tr><td>SIMD</td><td>NEON, SVE, SVE2, SME</td><td>Helium (MVE) — 128-bit beatwise</td></tr>
+    <tr><td>Virtualization</td><td>EL2 hypervisor + stage-2</td><td>None</td></tr>
+    <tr><td>Typical OS</td><td>Linux, Android, Windows, macOS/iOS</td><td>Zephyr, FreeRTOS, bare-metal</td></tr>
+  </table>
+  <p class="small" style="margin-top:0.4em;">Both are "Arm" but architecturally incompatible — a Cortex-A binary will not run on a Cortex-M and vice versa. Different register models, different ISAs, different system registers, different interrupt models. The companion <a href="https://github.com/BrendanJamesLynskey/Cortex_M" style="color:var(--blue);">Cortex-M presentation</a> covers the M side end-to-end.</p>
+</section>
+
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr"><span class="tag">15</span><h2>What Changed in Armv9-A</h2></div>
+  <div class="cols cols-2">
+    <div>
+      <h3 class="g">Mandated (was optional in v8)</h3>
+      <ul>
+        <li><strong>SVE2</strong> — vectors in every v9-A PE. v8 shipped SVE only in Fujitsu A64FX.</li>
+        <li><strong>MTE</strong> — Memory Tagging. Must be implementable (allowed to be disabled, but architecture must support it).</li>
+        <li><strong>TRBE</strong> — Trace Buffer Extension.</li>
+      </ul>
+      <h3 class="g" style="margin-top:0.5em;">New in v9-A</h3>
+      <ul>
+        <li><strong>RME</strong> — Realm Management Extension. Adds a <strong>fourth world</strong> (Realm) plus a <strong>Root</strong> world for EL3.</li>
+        <li><strong>CCA</strong> — Confidential Compute Architecture. Enables cloud tenant isolation from hypervisor.</li>
+        <li><strong>SME</strong> (v9.2) — Scalable Matrix Extension, streaming-mode tiles.</li>
+      </ul>
+    </div>
+    <div>
+      <div class="card amber">
+        <h3>Four worlds, not two</h3>
+        <p>v8-A had Secure / Non-secure. v9-A with RME adds <strong>Realm</strong> (for CCA workloads) and <strong>Root</strong> (EL3 only, above all worlds). The Granule Protection Table (GPT) partitions physical memory by world.</p>
+      </div>
+      <div class="card blue" style="margin-top:0.4em;">
+        <h3 class="b">Compat is preserved</h3>
+        <p>Existing Armv8-A software continues to run unchanged on v9-A. All v9 features are discoverable via <span class="mono">ID_AA64*_EL1</span> registers; OSes enable what they find.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr"><span class="tag">16</span><h2>Lessons for the Interview</h2></div>
+  <div class="cols cols-2">
+    <div>
+      <ul>
+        <li><strong class="a">"Why four ELs?"</strong> → EL0 user, EL1 OS, EL2 hypervisor, EL3 secure monitor. Matches the x86 ring model conceptually but with a clean entry/exit mechanism (ERET) and a secure-world bit that can only be flipped at EL3.</li>
+        <li><strong class="a">"How is an AArch64 syscall different from an AArch32 SVC?"</strong> → AArch64 <span class="mono">SVC #imm</span> traps synchronously to EL1 at <span class="mono">VBAR_EL1 + 0x400</span> (lower EL AArch64 sync offset). Syscall number is in X8 on Linux, args in X0-X5.</li>
+        <li><strong class="a">"What does VHE do?"</strong> → Virtualization Host Extension (Armv8.1) lets Linux run in EL2 directly by re-mapping EL2 register names to alias EL1 — enables KVM without a split host/hypervisor.</li>
+      </ul>
+    </div>
+    <div>
+      <ul>
+        <li><strong class="g">"Why is A64 fixed 32-bit?"</strong> → simpler fetch + decode, enables wider pipelines. Density loss is recovered by denser instructions (LDP/STP pair) and better IPC.</li>
+        <li><strong class="g">"What's NZCV + DAIF?"</strong> → PSTATE condition flags + interrupt mask. DAIF = Debug, SError, IRQ, FIQ. Setting <span class="mono">DAIFSet, #0xF</span> disables all four. Clearing with <span class="mono">DAIFClr</span>.</li>
+        <li><strong class="g">"Where does secure-world code live?"</strong> → EL3 (secure monitor / TF-A) and Secure EL1/0 (trusted OS like OP-TEE and trusted apps). EL3 is the only level that can toggle the NS bit.</li>
+        <li><strong class="g">"v9 is v8.5 + what?"</strong> → + mandated SVE2, mandated MTE, + RME/CCA, + TRBE.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr"><span class="tag">17</span><h2>Further Reading &amp; Sibling Decks</h2></div>
+  <div class="cols cols-2">
+    <div>
+      <h3>In this series</h3>
+      <ul>
+        <li><a href="../03-memory-system/" style="color:var(--blue);">Deck 03 — Memory System</a> — VMSAv8, caches, ordering, LSE atomics</li>
+        <li><a href="../04-vector-extensions/" style="color:var(--blue);">Deck 04 — NEON / SVE / SVE2 / SME</a></li>
+        <li><a href="../05-security-virtualization/" style="color:var(--blue);">Deck 05 — PAC, BTI, MTE, TrustZone-A, RME / CCA</a></li>
+        <li><a href="../06-microarchitecture/" style="color:var(--blue);">Deck 06 — OoO, DynamIQ, PMU</a></li>
+      </ul>
+      <h3 style="margin-top:0.6em;">Sibling decks</h3>
+      <ul>
+        <li><a href="https://brendanjameslynskey.github.io/Cortex_M/" style="color:var(--blue);">Cortex-M Series</a> — M-profile architecture</li>
+        <li><a href="https://brendanjameslynskey.github.io/AMBA/" style="color:var(--blue);">AMBA Series</a> — interconnect behind every Cortex-A SoC</li>
+        <li><a href="https://brendanjameslynskey.github.io/Neoverse/" style="color:var(--blue);">Neoverse Series</a> — server A-profile cores</li>
+      </ul>
+    </div>
+    <div>
+      <h3>Primary sources</h3>
+      <ul>
+        <li><strong>DDI 0487</strong> — <em>Arm Architecture Reference Manual for A-profile</em> — the canonical 9000-page spec. Search by exception class, register, or instruction.</li>
+        <li><strong>AAPCS64</strong> — Procedure Call Standard for AArch64 — defines calling convention.</li>
+        <li><strong>ARM DEN 0024A</strong> — <em>Programmer's Guide for Armv8-A</em> — friendlier intro volume.</li>
+        <li><strong>ARM IHI 0069</strong> — <em>SBSA</em> (Server Base System Architecture) — where EL assumptions tighten for servers.</li>
+        <li><strong>Learn the architecture</strong> — developer.arm.com/documentation — free tutorials keyed to each feature.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr"><span class="tag">18</span><h2>References</h2></div>
+  <div style="max-width:90%;margin:0 auto;font-size:0.58em;line-height:1.8;">
+    <p>
+      <strong class="a">Arm Ltd.</strong> — <em>Arm Architecture Reference Manual for A-profile</em> (DDI 0487) — definitive spec<br>
+      <strong class="a">Arm Ltd.</strong> — <em>Learn the architecture</em> series (free on developer.arm.com) — ELs, AArch64 registers, exception model guides<br>
+      <strong class="a">ARM DEN 0024A</strong> — <em>Programmer's Guide for Armv8-A</em> — accessible A64 + exception model tutorial<br>
+      <strong class="a">ARM IHI 0069</strong> — <em>Server Base System Architecture (SBSA)</em> — assumptions Neoverse makes about A-profile<br>
+      <strong class="a">David A. Patterson &amp; John Hennessy</strong> — <em>Computer Organization and Design: ARM Edition</em> (Morgan Kaufmann) — educational intro<br>
+      <strong class="a">Matteo Franchin</strong> — <em>Modern Arm Assembly Language Programming</em> (Apress, 2023) — A64 from scratch<br>
+      <strong class="a">Marc Andreessen Horowitz / A-Ha Moment podcasts</strong> — Arm architect interviews (Richard Grisenthwaite)<br>
+      <strong class="a">Linux kernel — <span class="mono">arch/arm64/</span></strong> — the canonical open-source reader of every A-profile feature
+    </p>
+    <p style="color:var(--muted);margin-top:0.8em;font-size:0.85em">
+      Presentation built with <a href="https://revealjs.com">Reveal.js 4.6</a> · Playfair Display + DM Sans + JetBrains Mono<br>
+      Educational use.
+    </p>
+  </div>
+</section>
+
+</div></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/reveal.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/plugin/highlight/highlight.min.js"></script>
+<script>
+Reveal.initialize({ hash: true, slideNumber: 'c/t', transition: 'fade', transitionSpeed: 'fast', controls: true, progress: true, center: false, width: 1100, height: 900, margin: 0.01, plugins: [RevealHighlight], highlight: { theme: 'monokai' } });
+</script>
+<script>
+(function(){ var h = Reveal.getConfig().height || 900; var m = Reveal.getConfig().margin || 0.02; var maxH = Math.floor(h * (1 - 2 * m)) + 'px'; function fixSlides(){ document.querySelectorAll('.reveal .slides>section,.reveal .slides>section>section').forEach(function(s){ s.style.display = 'block'; s.style.maxHeight = maxH; }); } Reveal.on('ready', fixSlides); Reveal.on('slidechanged', fixSlides); })();
+</script>
+</body>
+</html>
