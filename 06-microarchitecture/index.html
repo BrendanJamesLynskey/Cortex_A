@@ -10,7 +10,7 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/reveal.min.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/theme/black.min.css">
 <style>
-  :root { --amber:#f5a623;--green:#4ecb8d;--purple:#a78bfa;--blue:#60a5fa;--red:#f87171; --bg:#0a0a0f;--bg2:#10101a;--bg3:#181824;--border:#2a2a3a;--text:#e8e8f0;--muted:#8888a8; }
+  :root { --amber:#f4c44d;--green:#87d5bb;--purple:#c7b9fe;--blue:#a5dcfe;--red:#fd8c79; --bg:#10294a;--bg2:#143154;--bg3:#18375d;--border:#305782;--text:#ecf1f7;--muted:#8eaac7; }
   .reveal-viewport { background: var(--bg); }
   .reveal .slides section { background: transparent; }
   .reveal section { text-align: left; }
@@ -19,7 +19,7 @@
   .reveal section::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, var(--amber), var(--green)); }
   .reveal { font-family: 'DM Sans', sans-serif; color: var(--text); font-size: 22px; }
   .reveal .slide-number { font-family: 'JetBrains Mono', monospace; font-size: 0.7em; color: var(--muted); }
-  .reveal h1, .reveal h2, .reveal h3 { font-family: 'Playfair Display', serif; color: #fff; text-transform: none; letter-spacing: -0.01em; }
+  .reveal h1, .reveal h2, .reveal h3 { font-family: 'Playfair Display', serif; color: #ffffff; text-transform: none; letter-spacing: -0.01em; }
   .reveal h1 { font-size: 2.4em; font-weight: 900; color: var(--amber); line-height: 1.1; }
   .reveal h2 { font-size: 1.7em; font-weight: 700; color: var(--amber); margin-bottom: 0.6em; }
   .reveal h3 { font-size: 1.2em; font-weight: 700; color: var(--green); margin-bottom: 0.3em; }
@@ -27,19 +27,19 @@
   .reveal li { font-size: 0.7em; line-height: 1.5; margin-bottom: 0.25em; }
   .reveal code { font-family: 'JetBrains Mono', monospace; font-size: .72em; }
   .reveal pre  { background: var(--bg3); border: 1px solid var(--border); border-radius: 8px; padding: 0.5em 1em; margin: 0.4em 0; width: 100%; box-shadow: none; }
-  .reveal pre code { font-size: 0.58em; line-height: 1.5; background: transparent; color: #cdd6f4; }
+  .reveal pre code { font-size: 0.58em; line-height: 1.5; background: transparent; color: #dbe5ef; }
   .slide-hdr { display: flex; align-items: center; gap: .4em; border-bottom: 1px solid var(--border); padding-bottom: .2em; margin-bottom: .3em; }
   .slide-hdr .tag { font-family: 'JetBrains Mono', monospace; font-size: 0.55em; font-weight: 600; color: var(--bg); background: var(--amber); padding: .1em .4em; border-radius: 3px; letter-spacing: .04em; }
   .slide-hdr h2 { margin: 0; font-size: 1.4em; }
   .cols{display:grid;gap:1em;} .cols-2{grid-template-columns:1fr 1fr;} .cols-3{grid-template-columns:1fr 1fr 1fr;} .cols-6040{grid-template-columns:6fr 4fr;} .cols-4060{grid-template-columns:4fr 6fr;}
-  .card { background: var(--bg2); border: 1px solid var(--border); border-radius: 8px; padding: 1em 1.2em; box-shadow: 0 4px 20px rgba(0,0,0,0.3); margin: 0.4em 0; }
+  .card { background: var(--bg2); border: 1px solid var(--border); border-radius: 8px; padding: 1em 1.2em; box-shadow: 0 4px 20px rgba(10,31,58,0.3); margin: 0.4em 0; }
   .card.amber { border-left: 3px solid var(--amber); } .card.green { border-left: 3px solid var(--green); } .card.purple{ border-left: 3px solid var(--purple); } .card.blue  { border-left: 3px solid var(--blue); } .card.red   { border-left: 3px solid var(--red); }
   .card h3 { font-size: 1em; margin: 0 0 0.4em; }
-  .card p, .card ul { font-size: 0.8em; margin: 0; color: #b8b8d0; } .card ul { padding-left: 1.2em; } .card li { font-size: 0.85em; margin-bottom: 0.25em; }
+  .card p, .card ul { font-size: 0.8em; margin: 0; color: #bfd1e2; } .card ul { padding-left: 1.2em; } .card li { font-size: 0.85em; margin-bottom: 0.25em; }
   .reveal table { width: 100%; border-collapse: collapse; font-size: 0.65em; margin: 0.5em 0; }
   .reveal table th { background: var(--bg3); color: var(--amber); padding: 0.5em 0.7em; border: 1px solid var(--border); text-align: left; font-weight: 700; }
-  .reveal table td { padding: 0.5em 0.7em; border: 1px solid var(--border); color: #ccc; vertical-align: top; }
-  .reveal table tr:nth-child(even) td { background: #0e0e18; }
+  .reveal table td { padding: 0.5em 0.7em; border: 1px solid var(--border); color: #d0ddea; vertical-align: top; }
+  .reveal table tr:nth-child(even) td { background: #132f51; }
   .a{color:var(--amber);font-weight:600;} .g{color:var(--green);font-weight:600;} .p{color:var(--purple);font-weight:600;} .b{color:var(--blue);font-weight:600;} .r{color:var(--red);font-weight:600;} .mono{font-family:'JetBrains Mono',monospace;}
   svg.diagram { display: block; margin: 0 auto; overflow: visible; }
   .title-slide h1 { font-size: 2.4em; } .title-slide .subtitle { font-size: 0.85em; color: var(--green); font-weight: 400; letter-spacing: 0.06em; margin: 0.3em 0 0.6em; } .title-slide .meta { font-size: 0.6em; color: var(--muted); font-family: 'JetBrains Mono', monospace; }
@@ -51,7 +51,7 @@
 <div class="reveal">
 <div class="slides">
 
-<section class="title-slide" data-background-color="#0a0a0f">
+<section class="title-slide" data-background-color="#10294a">
   <div style="font-family:'JetBrains Mono',monospace;font-size:.5em;color:var(--muted);margin-bottom:.4em;letter-spacing:.1em;">ARM CORTEX-A · PRESENTATION 06</div>
   <h1>Microarchitecture — OoO, DynamIQ, PMU</h1>
   <div class="subtitle">From A8's in-order pipeline to X925's 10-wide OoO beast</div>
@@ -59,7 +59,7 @@
   <div class="meta">Fetch · Decode · Rename · ROB · Issue · L/S · Branch Prediction · DynamIQ DSU · PMU · SPE · TRBE</div>
 </section>
 
-<section data-background-color="#0a0a0f">
+<section data-background-color="#10294a">
   <div class="slide-hdr"><span class="tag">02</span><h2>From In-Order to Out-of-Order</h2></div>
   <table>
     <tr><th>Core</th><th>Decode</th><th>Issue</th><th>Stages</th><th>Comment</th></tr>
@@ -77,49 +77,49 @@
   <p class="small">Two trends over 20 years: <strong>wider front-ends</strong> (2 → 10 decode) and <strong>shorter pipelines</strong> (A15's 15 stages → A76's 13). Width grows IPC; shorter pipe reduces mis-predict penalty + improves branchy code.</p>
 </section>
 
-<section data-background-color="#0a0a0f">
+<section data-background-color="#10294a">
   <div class="slide-hdr"><span class="tag">03</span><h2>Canonical OoO Pipeline (Cortex-A78 / X1 class)</h2></div>
   <svg viewBox="0 0 920 230" style="width:100%;">
-    <rect x="10" y="10" width="900" height="210" rx="10" fill="#10101a" stroke="#f5a623"/>
-    <text x="460" y="32" text-anchor="middle" fill="#f5a623" font-family="Playfair Display" font-size="14" font-weight="700">Cortex-A76/A78 pipeline (schematic)</text>
+    <rect x="10" y="10" width="900" height="210" rx="10" fill="#143154" stroke="#f4c44d"/>
+    <text x="460" y="32" text-anchor="middle" fill="#f4c44d" font-family="Playfair Display" font-size="14" font-weight="700">Cortex-A76/A78 pipeline (schematic)</text>
 
     <g font-family="JetBrains Mono" font-size="10">
-      <rect x="30"  y="55" width="90" height="40" rx="4" fill="#2a1a0a" stroke="#f5a623"/>
-      <text x="75" y="80" text-anchor="middle" fill="#f5a623">Fetch (4W)</text>
+      <rect x="30"  y="55" width="90" height="40" rx="4" fill="#3f3f3a" stroke="#f4c44d"/>
+      <text x="75" y="80" text-anchor="middle" fill="#f4c44d">Fetch (4W)</text>
 
-      <rect x="130" y="55" width="90" height="40" rx="4" fill="#2a1a0a" stroke="#f5a623"/>
-      <text x="175" y="73" text-anchor="middle" fill="#f5a623">Predict</text>
-      <text x="175" y="87" text-anchor="middle" fill="#cdd6f4" font-size="8">BTB/RSB/BHT</text>
+      <rect x="130" y="55" width="90" height="40" rx="4" fill="#3f3f3a" stroke="#f4c44d"/>
+      <text x="175" y="73" text-anchor="middle" fill="#f4c44d">Predict</text>
+      <text x="175" y="87" text-anchor="middle" fill="#dbe5ef" font-size="8">BTB/RSB/BHT</text>
 
-      <rect x="230" y="55" width="90" height="40" rx="4" fill="#2a1a0a" stroke="#f5a623"/>
-      <text x="275" y="80" text-anchor="middle" fill="#f5a623">Decode (4W)</text>
+      <rect x="230" y="55" width="90" height="40" rx="4" fill="#3f3f3a" stroke="#f4c44d"/>
+      <text x="275" y="80" text-anchor="middle" fill="#f4c44d">Decode (4W)</text>
 
-      <rect x="330" y="55" width="110" height="40" rx="4" fill="#1a2540" stroke="#60a5fa"/>
-      <text x="385" y="73" text-anchor="middle" fill="#60a5fa">Rename/Dispatch</text>
-      <text x="385" y="87" text-anchor="middle" fill="#cdd6f4" font-size="8">~200-entry ROB</text>
+      <rect x="330" y="55" width="110" height="40" rx="4" fill="#2d5077" stroke="#a5dcfe"/>
+      <text x="385" y="73" text-anchor="middle" fill="#a5dcfe">Rename/Dispatch</text>
+      <text x="385" y="87" text-anchor="middle" fill="#dbe5ef" font-size="8">~200-entry ROB</text>
 
-      <rect x="450" y="55" width="100" height="40" rx="4" fill="#1f3a1f" stroke="#4ecb8d"/>
-      <text x="500" y="73" text-anchor="middle" fill="#4ecb8d">Issue queue</text>
-      <text x="500" y="87" text-anchor="middle" fill="#cdd6f4" font-size="8">per unit</text>
+      <rect x="450" y="55" width="100" height="40" rx="4" fill="#475f53" stroke="#87d5bb"/>
+      <text x="500" y="73" text-anchor="middle" fill="#87d5bb">Issue queue</text>
+      <text x="500" y="87" text-anchor="middle" fill="#dbe5ef" font-size="8">per unit</text>
 
-      <rect x="570" y="25" width="140" height="30" rx="4" fill="#2a1a2a" stroke="#a78bfa"/>
-      <text x="640" y="45" text-anchor="middle" fill="#a78bfa">2× ALU + MAC + DIV</text>
+      <rect x="570" y="25" width="140" height="30" rx="4" fill="#414255" stroke="#c7b9fe"/>
+      <text x="640" y="45" text-anchor="middle" fill="#c7b9fe">2× ALU + MAC + DIV</text>
 
-      <rect x="570" y="60" width="140" height="30" rx="4" fill="#2a1a2a" stroke="#a78bfa"/>
-      <text x="640" y="80" text-anchor="middle" fill="#a78bfa">2× FP/SIMD (128-bit)</text>
+      <rect x="570" y="60" width="140" height="30" rx="4" fill="#414255" stroke="#c7b9fe"/>
+      <text x="640" y="80" text-anchor="middle" fill="#c7b9fe">2× FP/SIMD (128-bit)</text>
 
-      <rect x="570" y="95" width="140" height="30" rx="4" fill="#2a1a2a" stroke="#a78bfa"/>
-      <text x="640" y="115" text-anchor="middle" fill="#a78bfa">2× Load/Store</text>
+      <rect x="570" y="95" width="140" height="30" rx="4" fill="#414255" stroke="#c7b9fe"/>
+      <text x="640" y="115" text-anchor="middle" fill="#c7b9fe">2× Load/Store</text>
 
-      <rect x="570" y="130" width="140" height="30" rx="4" fill="#2a1a2a" stroke="#a78bfa"/>
-      <text x="640" y="150" text-anchor="middle" fill="#a78bfa">Branch unit</text>
+      <rect x="570" y="130" width="140" height="30" rx="4" fill="#414255" stroke="#c7b9fe"/>
+      <text x="640" y="150" text-anchor="middle" fill="#c7b9fe">Branch unit</text>
 
-      <rect x="730" y="55" width="90" height="40" rx="4" fill="#2a0a1a" stroke="#f87171"/>
-      <text x="775" y="73" text-anchor="middle" fill="#f87171">Commit</text>
-      <text x="775" y="87" text-anchor="middle" fill="#cdd6f4" font-size="8">in-order</text>
+      <rect x="730" y="55" width="90" height="40" rx="4" fill="#442e36" stroke="#fd8c79"/>
+      <text x="775" y="73" text-anchor="middle" fill="#fd8c79">Commit</text>
+      <text x="775" y="87" text-anchor="middle" fill="#dbe5ef" font-size="8">in-order</text>
     </g>
 
-    <g stroke="#8888a8">
+    <g stroke="#8eaac7">
       <line x1="120" y1="75" x2="130" y2="75"/>
       <line x1="220" y1="75" x2="230" y2="75"/>
       <line x1="320" y1="75" x2="330" y2="75"/>
@@ -131,14 +131,14 @@
       <line x1="710" y1="75" x2="730" y2="75"/>
     </g>
 
-    <text x="30" y="200" fill="#8888a8" font-family="JetBrains Mono" font-size="10">
+    <text x="30" y="200" fill="#8eaac7" font-family="JetBrains Mono" font-size="10">
       L1-I 64 KB / BTB ~6000 entries / RSB 16 / Tournament + TAGE-SC · L1-D 64 KB · L2 512 KB – 1 MB private
     </text>
   </svg>
   <p class="small">The "big" Cortex-A pattern: 4-wide fetch/decode/rename, 8-wide issue across heterogeneous EUs, 2-3 load + store pipes, in-order commit. X-class widens this to 10-wide decode + 10+ issue.</p>
 </section>
 
-<section data-background-color="#0a0a0f">
+<section data-background-color="#10294a">
   <div class="slide-hdr"><span class="tag">04</span><h2>Branch Prediction — The Other Half of IPC</h2></div>
   <div class="cols cols-2">
     <div>
@@ -164,7 +164,7 @@
   </div>
 </section>
 
-<section data-background-color="#0a0a0f">
+<section data-background-color="#10294a">
   <div class="slide-hdr"><span class="tag">05</span><h2>big.LITTLE Origins (2011-2017)</h2></div>
   <div class="cols cols-2">
     <div>
@@ -197,7 +197,7 @@
   </div>
 </section>
 
-<section data-background-color="#0a0a0f">
+<section data-background-color="#10294a">
   <div class="slide-hdr"><span class="tag">06</span><h2>DynamIQ Shared Unit (DSU) — 2017 onwards</h2></div>
   <div class="cols cols-2">
     <div>
@@ -232,7 +232,7 @@
   </div>
 </section>
 
-<section data-background-color="#0a0a0f">
+<section data-background-color="#10294a">
   <div class="slide-hdr"><span class="tag">07</span><h2>Thermal &amp; Power — Why 1+3+4</h2></div>
   <div class="cols cols-2">
     <div>
@@ -258,7 +258,7 @@
   </div>
 </section>
 
-<section data-background-color="#0a0a0f">
+<section data-background-color="#10294a">
   <div class="slide-hdr"><span class="tag">08</span><h2>PMU — Performance Monitoring</h2></div>
   <div class="cols cols-2">
     <div>
@@ -296,7 +296,7 @@ mrs   x0, pmxevcntr_el0          // read count
   </div>
 </section>
 
-<section data-background-color="#0a0a0f">
+<section data-background-color="#10294a">
   <div class="slide-hdr"><span class="tag">09</span><h2>SPE — Statistical Profiling Extension (v8.2)</h2></div>
   <div class="cols cols-2">
     <div>
@@ -332,7 +332,7 @@ mrs   x0, pmxevcntr_el0          // read count
   </div>
 </section>
 
-<section data-background-color="#0a0a0f">
+<section data-background-color="#10294a">
   <div class="slide-hdr"><span class="tag">10</span><h2>L1 / L2 / L3 Cache Sizes Over Generations</h2></div>
   <table>
     <tr><th>Core</th><th>L1-I/D</th><th>L2 (private)</th><th>L3 (DSU)</th></tr>
@@ -349,7 +349,7 @@ mrs   x0, pmxevcntr_el0          // read count
   <p class="small">Two big shifts: (1) <strong>2018 — L2 became private</strong>, matched with introduction of the shared L3 in DSU. (2) <strong>2023 — L2 exploded to 2-3 MB per X-core</strong>, approaching laptop-class sizes.</p>
 </section>
 
-<section data-background-color="#0a0a0f">
+<section data-background-color="#10294a">
   <div class="slide-hdr"><span class="tag">11</span><h2>Load/Store Unit — the Quiet Bottleneck</h2></div>
   <div class="cols cols-2">
     <div>
@@ -374,7 +374,7 @@ mrs   x0, pmxevcntr_el0          // read count
   </div>
 </section>
 
-<section data-background-color="#0a0a0f">
+<section data-background-color="#10294a">
   <div class="slide-hdr"><span class="tag">12</span><h2>What the Compiler Sees — ACLE &amp; Attributes</h2></div>
   <div class="cols cols-2">
     <div>
@@ -419,7 +419,7 @@ ifunc impl = runtime_has_sve() ? sve_kernel : neon_kernel;
   </div>
 </section>
 
-<section data-background-color="#0a0a0f">
+<section data-background-color="#10294a">
   <div class="slide-hdr"><span class="tag">13</span><h2>Neoverse Heritage — Cortex-A → Server</h2></div>
   <div class="cols cols-2">
     <div>
@@ -456,7 +456,7 @@ ifunc impl = runtime_has_sve() ? sve_kernel : neon_kernel;
   </div>
 </section>
 
-<section data-background-color="#0a0a0f">
+<section data-background-color="#10294a">
   <div class="slide-hdr"><span class="tag">14</span><h2>Series Finale — Putting It All Together</h2></div>
   <div class="cols cols-2">
     <div>
@@ -488,7 +488,7 @@ ifunc impl = runtime_has_sve() ? sve_kernel : neon_kernel;
   </div>
 </section>
 
-<section data-background-color="#0a0a0f">
+<section data-background-color="#10294a">
   <div class="slide-hdr"><span class="tag">15</span><h2>Lessons</h2></div>
   <div class="cols cols-2">
     <div>
@@ -509,7 +509,7 @@ ifunc impl = runtime_has_sve() ? sve_kernel : neon_kernel;
   </div>
 </section>
 
-<section data-background-color="#0a0a0f">
+<section data-background-color="#10294a">
   <div class="slide-hdr"><span class="tag">16</span><h2>Closing: What the Next 5 Years Look Like</h2></div>
   <div class="cols cols-2">
     <div>
@@ -531,7 +531,7 @@ ifunc impl = runtime_has_sve() ? sve_kernel : neon_kernel;
   </div>
 </section>
 
-<section data-background-color="#0a0a0f">
+<section data-background-color="#10294a">
   <div class="slide-hdr"><span class="tag">17</span><h2>References</h2></div>
   <div style="max-width:90%;margin:0 auto;font-size:0.58em;line-height:1.8;">
     <p>

@@ -11,8 +11,8 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/theme/black.min.css">
 <style>
   :root {
-    --amber:#f5a623;--green:#4ecb8d;--purple:#a78bfa;--blue:#60a5fa;--red:#f87171;
-    --bg:#0a0a0f;--bg2:#10101a;--bg3:#181824;--border:#2a2a3a;--text:#e8e8f0;--muted:#8888a8;
+    --amber:#f4c44d;--green:#87d5bb;--purple:#c7b9fe;--blue:#a5dcfe;--red:#fd8c79;
+    --bg:#10294a;--bg2:#143154;--bg3:#18375d;--border:#305782;--text:#ecf1f7;--muted:#8eaac7;
   }
   .reveal-viewport { background: var(--bg); }
   .reveal .slides section { background: transparent; }
@@ -23,7 +23,7 @@
   .reveal section::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, var(--amber), var(--green)); }
   .reveal { font-family: 'DM Sans', sans-serif; color: var(--text); font-size: 22px; }
   .reveal .slide-number { font-family: 'JetBrains Mono', monospace; font-size: 0.7em; color: var(--muted); }
-  .reveal h1, .reveal h2, .reveal h3 { font-family: 'Playfair Display', serif; color: #fff; text-transform: none; letter-spacing: -0.01em; }
+  .reveal h1, .reveal h2, .reveal h3 { font-family: 'Playfair Display', serif; color: #ffffff; text-transform: none; letter-spacing: -0.01em; }
   .reveal h1 { font-size: 2.4em; font-weight: 900; color: var(--amber); line-height: 1.1; }
   .reveal h2 { font-size: 1.7em; font-weight: 700; color: var(--amber); margin-bottom: 0.6em; }
   .reveal h3 { font-size: 1.2em; font-weight: 700; color: var(--green); margin-bottom: 0.3em; }
@@ -31,19 +31,19 @@
   .reveal li { font-size: 0.7em; line-height: 1.5; margin-bottom: 0.25em; }
   .reveal code { font-family: 'JetBrains Mono', monospace; font-size: .72em; }
   .reveal pre  { background: var(--bg3); border: 1px solid var(--border); border-radius: 8px; padding: 0.5em 1em; margin: 0.4em 0; width: 100%; box-shadow: none; }
-  .reveal pre code { font-size: 0.58em; line-height: 1.5; background: transparent; color: #cdd6f4; }
+  .reveal pre code { font-size: 0.58em; line-height: 1.5; background: transparent; color: #dbe5ef; }
   .slide-hdr { display: flex; align-items: center; gap: .4em; border-bottom: 1px solid var(--border); padding-bottom: .2em; margin-bottom: .3em; }
   .slide-hdr .tag { font-family: 'JetBrains Mono', monospace; font-size: 0.55em; font-weight: 600; color: var(--bg); background: var(--amber); padding: .1em .4em; border-radius: 3px; letter-spacing: .04em; }
   .slide-hdr h2 { margin: 0; font-size: 1.4em; }
   .cols{display:grid;gap:1em;} .cols-2{grid-template-columns:1fr 1fr;} .cols-3{grid-template-columns:1fr 1fr 1fr;} .cols-6040{grid-template-columns:6fr 4fr;} .cols-4060{grid-template-columns:4fr 6fr;}
-  .card { background: var(--bg2); border: 1px solid var(--border); border-radius: 8px; padding: 1em 1.2em; box-shadow: 0 4px 20px rgba(0,0,0,0.3); margin: 0.4em 0; }
+  .card { background: var(--bg2); border: 1px solid var(--border); border-radius: 8px; padding: 1em 1.2em; box-shadow: 0 4px 20px rgba(10,31,58,0.3); margin: 0.4em 0; }
   .card.amber { border-left: 3px solid var(--amber); } .card.green { border-left: 3px solid var(--green); } .card.purple{ border-left: 3px solid var(--purple); } .card.blue  { border-left: 3px solid var(--blue); } .card.red   { border-left: 3px solid var(--red); }
   .card h3 { font-size: 1em; margin: 0 0 0.4em; }
-  .card p, .card ul  { font-size: 0.8em; margin: 0; color: #b8b8d0; } .card ul { padding-left: 1.2em; } .card li { font-size: 0.85em; margin-bottom: 0.25em; }
+  .card p, .card ul  { font-size: 0.8em; margin: 0; color: #bfd1e2; } .card ul { padding-left: 1.2em; } .card li { font-size: 0.85em; margin-bottom: 0.25em; }
   .reveal table { width: 100%; border-collapse: collapse; font-size: 0.65em; margin: 0.5em 0; }
   .reveal table th { background: var(--bg3); color: var(--amber); padding: 0.5em 0.7em; border: 1px solid var(--border); text-align: left; font-weight: 700; }
-  .reveal table td { padding: 0.5em 0.7em; border: 1px solid var(--border); color: #ccc; vertical-align: top; }
-  .reveal table tr:nth-child(even) td { background: #0e0e18; }
+  .reveal table td { padding: 0.5em 0.7em; border: 1px solid var(--border); color: #d0ddea; vertical-align: top; }
+  .reveal table tr:nth-child(even) td { background: #132f51; }
   .a{color:var(--amber);font-weight:600;} .g{color:var(--green);font-weight:600;} .p{color:var(--purple);font-weight:600;} .b{color:var(--blue);font-weight:600;} .r{color:var(--red);font-weight:600;} .mono{font-family:'JetBrains Mono',monospace;}
   svg.diagram { display: block; margin: 0 auto; overflow: visible; }
   .pill { display: inline-block; font-family: 'JetBrains Mono', monospace; font-size: 0.6em; padding: 0.15em 0.6em; border-radius: 999px; border: 1px solid; margin: 0 .08em; }
@@ -51,7 +51,7 @@
   .title-slide h1 { font-size: 2.4em; } .title-slide .subtitle { font-size: 0.85em; color: var(--green); font-weight: 400; letter-spacing: 0.06em; margin: 0.3em 0 0.6em; } .title-slide .meta { font-size: 0.6em; color: var(--muted); font-family: 'JetBrains Mono', monospace; }
   .dim { color: var(--muted); } .small { font-size: 0.65em; } .smaller { font-size: 0.55em; } .tiny { font-size: 0.48em; }
   .reveal ul, .reveal ol { margin: .15em 0 .15em 1em; }
-  .quote { font-style: italic; color: #ccc; padding: 0.5em 1em; border-left: 3px solid var(--blue); background: var(--bg2); border-radius: 4px; font-size: 0.8em; }
+  .quote { font-style: italic; color: #d0ddea; padding: 0.5em 1em; border-left: 3px solid var(--blue); background: var(--bg2); border-radius: 4px; font-size: 0.8em; }
   .quote cite { display: block; font-size: 0.72em; color: var(--muted); font-style: normal; margin-top: 0.4em; }
 
   .el-picker { display: flex; gap: 6px; margin: 0.4em 0; font-family: 'JetBrains Mono', monospace; font-size: 0.65em; flex-wrap: wrap; }
@@ -68,7 +68,7 @@
 <div class="reveal">
 <div class="slides">
 
-<section class="title-slide" data-background-color="#0a0a0f">
+<section class="title-slide" data-background-color="#10294a">
   <div style="font-family:'JetBrains Mono',monospace;font-size:.5em;color:var(--muted);margin-bottom:.4em;letter-spacing:.1em;">ARM CORTEX-A · PRESENTATION 02</div>
   <h1>Armv8-A / Armv9-A Architecture</h1>
   <div class="subtitle">Exception Levels · AArch64 · A64 ISA · System Registers · v8.x → v9.x Evolution</div>
@@ -76,7 +76,7 @@
   <div class="meta">EL0 · EL1 · EL2 · EL3 · AArch64 vs AArch32 · SPSR / ELR / VBAR · ESR · SCR / HCR</div>
 </section>
 
-<section data-background-color="#0a0a0f">
+<section data-background-color="#10294a">
   <div class="slide-hdr"><span class="tag">02</span><h2>What is an "Architecture Profile"?</h2></div>
   <div class="cols cols-2">
     <div>
@@ -105,7 +105,7 @@
   </div>
 </section>
 
-<section data-background-color="#0a0a0f">
+<section data-background-color="#10294a">
   <div class="slide-hdr"><span class="tag">03</span><h2>AArch64 vs AArch32 — Two Execution States</h2></div>
   <table>
     <tr><th>Aspect</th><th>AArch64</th><th>AArch32</th></tr>
@@ -120,28 +120,28 @@
   <p class="small" style="margin-top:0.4em;">A PE (Processing Element) selects execution state <strong>per Exception Level</strong> — e.g. EL1 running AArch64 can still have EL0 running AArch32 user-mode apps on cores that allow it.</p>
 </section>
 
-<section data-background-color="#0a0a0f">
+<section data-background-color="#10294a">
   <div class="slide-hdr"><span class="tag">04</span><h2>The Four Exception Levels</h2></div>
   <div class="cols cols-2">
     <div>
       <svg viewBox="0 0 340 280" style="width:100%;">
-        <rect x="10" y="10" width="320" height="260" rx="10" fill="#10101a" stroke="#f5a623"/>
+        <rect x="10" y="10" width="320" height="260" rx="10" fill="#143154" stroke="#f4c44d"/>
         <!-- EL0 -->
-        <rect x="30" y="30" width="280" height="50" rx="5" fill="#1f3a1f" stroke="#4ecb8d"/>
-        <text x="170" y="50" text-anchor="middle" fill="#4ecb8d" font-family="JetBrains Mono" font-size="11" font-weight="700">EL0 — Unprivileged (user)</text>
-        <text x="170" y="68" text-anchor="middle" fill="#cdd6f4" font-family="JetBrains Mono" font-size="9">Applications (userspace)</text>
+        <rect x="30" y="30" width="280" height="50" rx="5" fill="#475f53" stroke="#87d5bb"/>
+        <text x="170" y="50" text-anchor="middle" fill="#87d5bb" font-family="JetBrains Mono" font-size="11" font-weight="700">EL0 — Unprivileged (user)</text>
+        <text x="170" y="68" text-anchor="middle" fill="#dbe5ef" font-family="JetBrains Mono" font-size="9">Applications (userspace)</text>
         <!-- EL1 -->
-        <rect x="30" y="90" width="280" height="50" rx="5" fill="#1a2540" stroke="#60a5fa"/>
-        <text x="170" y="110" text-anchor="middle" fill="#60a5fa" font-family="JetBrains Mono" font-size="11" font-weight="700">EL1 — OS kernel</text>
-        <text x="170" y="128" text-anchor="middle" fill="#cdd6f4" font-family="JetBrains Mono" font-size="9">Linux / Windows / XNU kernel</text>
+        <rect x="30" y="90" width="280" height="50" rx="5" fill="#2d5077" stroke="#a5dcfe"/>
+        <text x="170" y="110" text-anchor="middle" fill="#a5dcfe" font-family="JetBrains Mono" font-size="11" font-weight="700">EL1 — OS kernel</text>
+        <text x="170" y="128" text-anchor="middle" fill="#dbe5ef" font-family="JetBrains Mono" font-size="9">Linux / Windows / XNU kernel</text>
         <!-- EL2 -->
-        <rect x="30" y="150" width="280" height="50" rx="5" fill="#2a1a2a" stroke="#a78bfa"/>
-        <text x="170" y="170" text-anchor="middle" fill="#a78bfa" font-family="JetBrains Mono" font-size="11" font-weight="700">EL2 — Hypervisor</text>
-        <text x="170" y="188" text-anchor="middle" fill="#cdd6f4" font-family="JetBrains Mono" font-size="9">KVM, Xen, Hyper-V, pKVM (Android)</text>
+        <rect x="30" y="150" width="280" height="50" rx="5" fill="#414255" stroke="#c7b9fe"/>
+        <text x="170" y="170" text-anchor="middle" fill="#c7b9fe" font-family="JetBrains Mono" font-size="11" font-weight="700">EL2 — Hypervisor</text>
+        <text x="170" y="188" text-anchor="middle" fill="#dbe5ef" font-family="JetBrains Mono" font-size="9">KVM, Xen, Hyper-V, pKVM (Android)</text>
         <!-- EL3 -->
-        <rect x="30" y="210" width="280" height="50" rx="5" fill="#2a1a0a" stroke="#f5a623"/>
-        <text x="170" y="230" text-anchor="middle" fill="#f5a623" font-family="JetBrains Mono" font-size="11" font-weight="700">EL3 — Secure Monitor</text>
-        <text x="170" y="248" text-anchor="middle" fill="#cdd6f4" font-family="JetBrains Mono" font-size="9">TF-A (Trusted Firmware-A) · SMC handler</text>
+        <rect x="30" y="210" width="280" height="50" rx="5" fill="#3f3f3a" stroke="#f4c44d"/>
+        <text x="170" y="230" text-anchor="middle" fill="#f4c44d" font-family="JetBrains Mono" font-size="11" font-weight="700">EL3 — Secure Monitor</text>
+        <text x="170" y="248" text-anchor="middle" fill="#dbe5ef" font-family="JetBrains Mono" font-size="9">TF-A (Trusted Firmware-A) · SMC handler</text>
       </svg>
     </div>
     <div>
@@ -156,7 +156,7 @@
   </div>
 </section>
 
-<section data-background-color="#0a0a0f">
+<section data-background-color="#10294a">
   <div class="slide-hdr"><span class="tag">05</span><h2>Exception Entry &amp; Return</h2></div>
   <div class="cols cols-2">
     <div>
@@ -187,7 +187,7 @@
   </div>
 </section>
 
-<section data-background-color="#0a0a0f">
+<section data-background-color="#10294a">
   <div class="slide-hdr"><span class="tag">06</span><h2>A64 — The 64-bit Instruction Set</h2></div>
   <div class="cols cols-2">
     <div>
@@ -223,7 +223,7 @@ eret                         // ELR_ELx -> PC, SPSR -> PSTATE
   </div>
 </section>
 
-<section data-background-color="#0a0a0f">
+<section data-background-color="#10294a">
   <div class="slide-hdr"><span class="tag">07</span><h2>PSTATE — The Processor State</h2></div>
   <div class="cols cols-2">
     <div>
@@ -254,7 +254,7 @@ eret                         // ELR_ELx -> PC, SPSR -> PSTATE
   </div>
 </section>
 
-<section data-background-color="#0a0a0f">
+<section data-background-color="#10294a">
   <div class="slide-hdr"><span class="tag">08</span><h2>Key System Registers</h2></div>
   <table>
     <tr><th>Register</th><th>Purpose</th><th>Role</th></tr>
@@ -272,7 +272,7 @@ eret                         // ELR_ELx -> PC, SPSR -> PSTATE
   </table>
 </section>
 
-<section data-background-color="#0a0a0f">
+<section data-background-color="#10294a">
   <div class="slide-hdr"><span class="tag">09</span><h2>Synchronous vs Asynchronous Exceptions</h2></div>
   <div class="cols cols-2">
     <div>
@@ -301,7 +301,7 @@ eret                         // ELR_ELx -> PC, SPSR -> PSTATE
   </div>
 </section>
 
-<section data-background-color="#0a0a0f">
+<section data-background-color="#10294a">
   <div class="slide-hdr"><span class="tag">10</span><h2>Interactive — Explore Each Exception Level</h2></div>
   <div class="el-picker" id="elp">
     <div class="btn active" data-k="el0">EL0 — User</div>
@@ -333,7 +333,7 @@ eret                         // ELR_ELx -> PC, SPSR -> PSTATE
   </script>
 </section>
 
-<section data-background-color="#0a0a0f">
+<section data-background-color="#10294a">
   <div class="slide-hdr"><span class="tag">11</span><h2>Armv8.x Evolution — Where the Features Landed</h2></div>
   <table>
     <tr><th>Version</th><th>Year</th><th>Feature highlights</th></tr>
@@ -350,7 +350,7 @@ eret                         // ELR_ELx -> PC, SPSR -> PSTATE
   </table>
 </section>
 
-<section data-background-color="#0a0a0f">
+<section data-background-color="#10294a">
   <div class="slide-hdr"><span class="tag">12</span><h2>AArch64 Calling Convention (AAPCS64)</h2></div>
   <div class="cols cols-2">
     <div>
@@ -389,7 +389,7 @@ caller:
   </div>
 </section>
 
-<section data-background-color="#0a0a0f">
+<section data-background-color="#10294a">
   <div class="slide-hdr"><span class="tag">13</span><h2>WFI / WFE — Low-Power Hints</h2></div>
   <div class="cols cols-2">
     <div>
@@ -423,7 +423,7 @@ release:
   </div>
 </section>
 
-<section data-background-color="#0a0a0f">
+<section data-background-color="#10294a">
   <div class="slide-hdr"><span class="tag">14</span><h2>A-profile vs M-profile — Why They Look Different</h2></div>
   <table>
     <tr><th>Aspect</th><th>Cortex-A (A-profile)</th><th>Cortex-M (M-profile)</th></tr>
@@ -439,7 +439,7 @@ release:
   <p class="small" style="margin-top:0.4em;">Both are "Arm" but architecturally incompatible — a Cortex-A binary will not run on a Cortex-M and vice versa. Different register models, different ISAs, different system registers, different interrupt models. The companion <a href="https://github.com/BrendanJamesLynskey/Cortex_M" style="color:var(--blue);">Cortex-M presentation</a> covers the M side end-to-end.</p>
 </section>
 
-<section data-background-color="#0a0a0f">
+<section data-background-color="#10294a">
   <div class="slide-hdr"><span class="tag">15</span><h2>What Changed in Armv9-A</h2></div>
   <div class="cols cols-2">
     <div>
@@ -469,7 +469,7 @@ release:
   </div>
 </section>
 
-<section data-background-color="#0a0a0f">
+<section data-background-color="#10294a">
   <div class="slide-hdr"><span class="tag">16</span><h2>Lessons</h2></div>
   <div class="cols cols-2">
     <div>
@@ -490,7 +490,7 @@ release:
   </div>
 </section>
 
-<section data-background-color="#0a0a0f">
+<section data-background-color="#10294a">
   <div class="slide-hdr"><span class="tag">17</span><h2>Further Reading &amp; Sibling Decks</h2></div>
   <div class="cols cols-2">
     <div>
@@ -521,7 +521,7 @@ release:
   </div>
 </section>
 
-<section data-background-color="#0a0a0f">
+<section data-background-color="#10294a">
   <div class="slide-hdr"><span class="tag">18</span><h2>References</h2></div>
   <div style="max-width:90%;margin:0 auto;font-size:0.58em;line-height:1.8;">
     <p>

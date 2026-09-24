@@ -9,17 +9,17 @@
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@400;500;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet" />
 <style>
   :root {
-    --bg:      #0a0a0f;
-    --surface: #131318;
-    --border:  #23232a;
-    --text:    #d4d4d8;
-    --text2:   #a1a1aa;
-    --dim:     #71717a;
-    --accent:  #f59e0b;
-    --green:   #10b981;
-    --purple:  #8b5cf6;
-    --blue:    #60a5fa;
-    --red:     #ef4444;
+    --bg:      #10294a;
+    --surface: #153357;
+    --border:  #264b74;
+    --text:    #d8e3ee;
+    --text2:   #a7bed5;
+    --dim:     #6487aa;
+    --accent:  #f3bf41;
+    --green:   #73c7af;
+    --purple:  #a68ef0;
+    --blue:    #a5dcfe;
+    --red:     #f86d53;
   }
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   html { font-size: 16px; scroll-behavior: smooth; }
@@ -31,7 +31,7 @@
     min-height: 100vh;
   }
   a { color: var(--blue); text-decoration: none; }
-  a:hover { color: #93c5fd; }
+  a:hover { color: #c6e9fe; }
 
   .container { max-width: 920px; margin: 0 auto; padding: 3rem 1.5rem 4rem; }
 
@@ -42,7 +42,7 @@
     font-weight: 900;
     font-size: 2.8rem;
     letter-spacing: -0.02em;
-    color: #fafafa;
+    color: #fbfcfd;
     margin-bottom: 0.3rem;
   }
   header .subtitle {
@@ -68,9 +68,9 @@
     padding: 1.25rem 1.5rem;
     transition: border-color 0.2s, box-shadow 0.2s;
   }
-  .card:hover { border-color: rgba(245,158,11,.3); box-shadow: 0 0 20px rgba(245,158,11,.06); }
-  .card.active { border-color: rgba(245,158,11,.35); }
-  .card.active:hover { box-shadow: 0 0 25px rgba(245,158,11,.1); }
+  .card:hover { border-color: rgba(243,191,65,.3); box-shadow: 0 0 20px rgba(243,191,65,.06); }
+  .card.active { border-color: rgba(243,191,65,.35); }
+  .card.active:hover { box-shadow: 0 0 25px rgba(243,191,65,.1); }
 
   .card .num {
     font-family: 'Playfair Display', serif;
@@ -85,7 +85,7 @@
     font-family: 'Playfair Display', serif;
     font-weight: 700;
     font-size: 1.15rem;
-    color: #fafafa;
+    color: #fbfcfd;
     margin-bottom: 0.2rem;
   }
   .card .info p {
@@ -107,9 +107,9 @@
   .btn:active { transform: scale(0.97); }
   .btn-launch {
     background: var(--accent);
-    color: #0a0a0f;
+    color: #10294a;
   }
-  .btn-launch:hover { background: #fbbf24; color: #0a0a0f; }
+  .btn-launch:hover { background: #fbd555; color: #10294a; }
 
   .badge {
     display: inline-block;
@@ -119,7 +119,7 @@
     font-weight: 700;
     font-family: 'JetBrains Mono', monospace;
   }
-  .badge-complete { background: rgba(16,185,129,.12); color: var(--green); border: 1px solid rgba(16,185,129,.25); }
+  .badge-complete { background: rgba(115,199,175,.12); color: var(--green); border: 1px solid rgba(115,199,175,.25); }
 
   footer {
     text-align: center;
